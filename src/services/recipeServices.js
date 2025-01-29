@@ -1,25 +1,28 @@
-import instance from "./instance";
+import axios from "axios";
 
-const recipeServices = {
-    createRecipe: async (data) => {
-        return await instance.post("/user/recipes", data);
-    },
+const getAllRecipes = async () => {
+  try {
+    const token = localStorage.getItem("authToken"); // Or however you store the token
 
-  getAllRecipes: async () => {
-    return await instance.get("/user/recipes");
-  },
+    const response = await axios.get(
+      "https://recipe-sharing-project-be.onrender.com/user/recipes",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  getRecipeById: async (id) => {
-    return await instance.get(`/user/recipes/${id}`);
-  },
-
-  updateRecipe: async (id, data) => {
-    return await instance.put(`/user/recipes/${id}`, data);
-  },
-
-  deleteRecipe: async (id) => {
-    return await instance.delete(`/user/recipes/${id}`);
-  },
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching recipes:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 };
 
-export default recipeServices;
+export default {
+  getAllRecipes,
+};

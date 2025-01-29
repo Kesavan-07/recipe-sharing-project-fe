@@ -5,12 +5,13 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import authLoader from "./loaders/unit/authLoader";
 import Logout from "./components/Logout";
-import RecipeDashboard from "./pages/user/RecipeDashboard"; 
-import recipesLoader from "./loaders/unit/recipesLoader"; 
-import recipeLoader from "./loaders/unit/recipeLoader"; 
-import UserLayout from "./layouts/UserLayout"; 
+import RecipeDashboard from "./pages/user/RecipeDashboard";
+import recipesLoader from "./loaders/unit/recipesLoader";
+import recipeLoader from "./loaders/unit/recipeLoader";
+import UserLayout from "./layouts/UserLayout";
+import Profile from "./pages/user/Profile"; 
+import MyRecipes from "./pages/user/MyRecipes"; 
 import Loader from "./components/Loader";
-
 
 const routes = [
   {
@@ -30,6 +31,14 @@ const routes = [
             path: "dashboard",
             element: <RecipeDashboard />,
             loader: recipesLoader,
+          },
+          {
+            path: "profile", // ✅ Added Profile Route
+            element: <Profile />,
+          },
+          {
+            path: "recipes", // ✅ Added My Recipes Route
+            element: <MyRecipes />,
           },
           {
             path: "recipes/:id",
