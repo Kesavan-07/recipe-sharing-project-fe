@@ -6,36 +6,41 @@ import { useDispatch } from "react-redux";
 import { clearUser } from "../redux/features/auth/userSlice";
 
 const Logout = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+  const logoutUser = async () => {
+    try {
+      const response = await authServices.logout();
 
-    const logoutUser = async () => {
-        try {
-            const response = await authServices.logout();
+      if (response.status === 200) {
+        toast.success(response.data.message);
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
+        // clear the user from redux
+        dispatch(clearUser());
 
-                // clear the user from redux
-                dispatch(clearUser());
-
-                setTimeout(() => {
-                    navigate("/", { replace: true });
-                }, 1000);
-            }
-        } catch (error) {
-            toast.error(error.response.data.message);
-        }
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 1000);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
     }
+  };
 
-    useEffect(() => {
-        logoutUser();
-    }, []);
+  useEffect(() => {
+    logoutUser();
+  }, []);
 
-    return (
-        <div>Logging Out...Please Wait...</div>
-    )
-}
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      {loading ? (
+        <Loader /> // Show the loader while logging out
+      ) : (
+        <div>Logging Out...Please Wait...</div> // Show message if loading is false
+      )}
+    </div>
+  );
+};
 
 export default Logout;
