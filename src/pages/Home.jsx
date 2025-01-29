@@ -16,7 +16,8 @@ const Home = () => {
         <p className="text-3xl mb-6">Welcome to the Recipe Sharing Platform!</p>
         <ul className="list-disc pl-5 text-3xl">
           <li>Click on the link above to register or login</li>
-          <li>After logging in, you will be redirected to your dashboard</li>
+          <li>After logging in,
+            you will be redirected to your dashboard</li>
           <li>You can then explore, share, and save recipes</li>
         </ul>
       </div>

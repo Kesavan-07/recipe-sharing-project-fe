@@ -2,16 +2,16 @@ import instance from "./instance";
 
 const authServices = {
     register: async (data) => {
-        return await instance.post('/auth/register', data);
+        return await instance.post("/api/v1/auth/register", data);
     },
     login: async (data) => {
-        return await instance.post('/auth/login', data);
+        return await instance.post("/api/v1/auth/login", data);
     },
     logout: async () => {
-        return await instance.get('/auth/logout');
+        return await instance.post("/api/v1/auth/logout");
     },
     me: async () => {
-        return await instance.get('/auth/myprofile');
+        return await instance.get("/api/v1/auth/myprofile");
     }
 }
 
