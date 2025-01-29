@@ -156,7 +156,7 @@ const StyledWrapper = styled.div`
     bottom: 0;
     width: 100%;
     height: 100%;
-    background: url("/public/Images/login.jpg") no-repeat center;
+    background: url("/Images/login.jpg") no-repeat center;
     background-size: cover;
     z-index: -1;
   }
