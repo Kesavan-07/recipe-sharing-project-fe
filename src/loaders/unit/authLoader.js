@@ -2,7 +2,7 @@ import authServices from "../../services/authServices";
 
 const authLoader = async () => {
   try {
-    const response = await authServices.myprofile();
+    const response = await authServices.myProfile();
     console.log("AuthLoader Response:", response.data); // Debugging
 
     // Check if the user data is valid

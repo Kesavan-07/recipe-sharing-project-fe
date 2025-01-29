@@ -19,54 +19,59 @@ const Form = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true); 
+  const [error, setError] = useState(""); 
+  const [isLogin, setIsLogin] = useState(true);
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
 
-  console.log("Logging in with email:", email);
+  
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  try {
-    const response = await authServices.login({ email, password });
+    if (!email || !password) {
+      toast.error("Please enter email and password");
+      setLoading(false);
+      return;
+    }
 
-    if (response.status === 200) {
-      toast.success("Logged in successfully");
+    try {
+      const data = await authServices.login({ email, password }); // ✅ No need for response.json()
 
-      // Store the token in localStorage
-      localStorage.setItem("token", response.data.token);
-
-      try {
-        const userResponse = await authServices.myprofile();
-        dispatch(setUser(userResponse.data));
-
-        dispatch(setEmail(""));
-        dispatch(setPassword(""));
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        dispatch(setUser(data.user));
+        toast.success("Login successful");
 
         setTimeout(() => {
-          navigate("/", { replace: true });
+          navigate("/user/dashboard"); // ✅ Ensure correct path
         }, 500);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        toast.error("Failed to fetch user profile");
+      } else {
+        throw new Error("Invalid credentials");
       }
-    } else {
-      toast.error("Login failed");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error.message);
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+
+  // Handle Signup (currently just a placeholder, needs backend implementation)
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    toast.info("Signup functionality coming soon!");
+  };
 
   const handleSwitch = () => {
-    setIsLogin(!isLogin); 
+    setIsLogin(!isLogin);
   };
 
   return (
     <StyledWrapper>
-           <div className="background"></div>
+      <div className="background"></div>
       <div className="wrapper">
         <div className="card-switch">
           <label className="switch">
@@ -90,6 +95,7 @@ const handleLogin = async (e) => {
                     type="email"
                     value={email}
                     onChange={(e) => dispatch(setEmail(e.target.value))}
+                    required
                   />
                   <input
                     className="flip-card__input"
@@ -98,9 +104,12 @@ const handleLogin = async (e) => {
                     type="password"
                     value={password}
                     onChange={(e) => dispatch(setPassword(e.target.value))}
+                    required
                   />
+                  {error && <p style={{ color: "red" }}>{error}</p>}{" "}
+                  {/* ✅ Show error message */}
                   <button className="flip-card__btn" type="submit">
-                    Let`s go!
+                    {loading ? "Logging in..." : "Let’s go!"}
                   </button>
                 </form>
               </div>
@@ -108,29 +117,35 @@ const handleLogin = async (e) => {
               {/* Signup Form */}
               <div className="flip-card__back">
                 <div className="title">Sign up</div>
-                <form className="flip-card__form">
+                <form className="flip-card__form" onSubmit={handleSignup}>
                   <input
                     className="flip-card__input"
                     placeholder="Name"
                     type="text"
+                    required
                   />
                   <input
                     className="flip-card__input"
                     placeholder="Email"
                     type="email"
+                    required
                   />
                   <input
                     className="flip-card__input"
                     placeholder="Password"
                     type="password"
+                    required
                   />
-                  <button className="flip-card__btn">Confirm!</button>
+                  <button className="flip-card__btn" type="submit">
+                    Confirm!
+                  </button>
                 </form>
               </div>
             </div>
           </label>
         </div>
-        </div>
+      </div>
+
       {/* Loader */}
       {loading && (
         <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">

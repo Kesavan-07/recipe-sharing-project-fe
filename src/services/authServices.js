@@ -1,30 +1,48 @@
+import instance from "./instance";
+
 const BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1/auth";
 
 const authServices = {
-  register: async (data) =>
-    fetch(`${BASE_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }),
+  register: async (data) => {
+    return instance
+      .post(`${BASE_URL}/register`, data)
+      .then((response) => response.data)
+      .catch((error) => {
+        throw error.response?.data || error.message;
+      });
+  },
 
-  login: async (data) =>
-    fetch(`${BASE_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }),
+  login: async (data) => {
+    return instance
+      .post(`${BASE_URL}/login`, data)
+      .then((response) => response.data)
+      .catch((error) => {
+        throw error.response?.data || error.message;
+      });
+  },
 
-  logout: async () =>
-    fetch(`${BASE_URL}/logout`, {
-      method: "POST",
-    }),
+  logout: async () => {
+    return instance
+      .post(`${BASE_URL}/logout`)
+      .then((response) => response.data)
+      .catch((error) => {
+        throw error.response?.data || error.message;
+      });
+  },
 
   myProfile: async () => {
     const token = localStorage.getItem("token");
-    return fetch(`${BASE_URL}/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    return instance
+      .get(`${BASE_URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => response.data)
+      .catch((error) => {
+        throw error.response?.data || error.message;
+      });
   },
 };
 

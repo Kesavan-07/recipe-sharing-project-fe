@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import recipeServices from "../../services/recipeServices";
-import { toast } from "react-toastify";
-import Loader from "../../components/Loader";
 
 const RecipeDashboard = () => {
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [recipes, setRecipes] = useState([]); // ✅ Always start with an empty array
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
         const response = await recipeServices.getAllRecipes();
-        setRecipes(response.data);
-      } catch (error) {
-        toast.error("Failed to fetch recipes.");
+        console.log("Fetched Recipes:", response); // ✅ Debug response
+
+        if (!Array.isArray(response)) {
+          throw new Error("Invalid data format: Expected an array.");
+        }
+
+        setRecipes(response);
+      } catch (err) {
+        console.error("Error fetching recipes:", err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -22,21 +28,22 @@ const RecipeDashboard = () => {
     fetchRecipes();
   }, []);
 
-  if (loading) {
-    return <Loader />;
-  }
+  if (loading) return <p>Loading recipes...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl mb-4">Recipe Dashboard</h2>
-      <div>
-        {recipes.map((recipe) => (
-          <div key={recipe._id} className="border rounded p-3 mb-3">
-            <h3>{recipe.title}</h3>
+    <div>
+      <h1>Recipe Dashboard</h1>
+      {recipes.length === 0 ? (
+        <p>No recipes found.</p>
+      ) : (
+        recipes.map((recipe) => (
+          <div key={recipe._id}>
+            <h2>{recipe.title}</h2>
             <p>{recipe.description}</p>
           </div>
-        ))}
-      </div>
+        ))
+      )}
     </div>
   );
 };
