@@ -2,21 +2,25 @@ import instance from "./instance";
 
 const authServices = {
   register: async (data) => {
-    return await instance.post("/api/v1/auth/register", data);
+    return await instance.post("/api/v1/register", data);
   },
   login: async (data) => {
-    return await instance.post("/api/v1/auth/login", {
+    return await instance.post("/api/v1/login", data, {
       headers: {
         "Content-Type": "application/json",
       },
-      data: JSON.stringify(data),
     });
   },
   logout: async () => {
-    return await instance.post("/api/v1/auth/logout");
+    return await instance.post("/api/v1/logout");
   },
-  me: async () => {
-    return await instance.get("/api/v1/auth/myprofile");
+  myprofile: async () => {
+    const token = localStorage.getItem("token"); // Adjust this line based on how you store the token
+    return await instance.get("/api/v1/myprofile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
 };
 

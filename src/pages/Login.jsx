@@ -21,18 +21,23 @@ const Form = () => {
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true); 
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await authServices.login({ email, password });
-      
+  console.log("Logging in with email:", email);
 
-      if (response.status === 200) {
-        toast.success("Logged in successfully");
+  try {
+    const response = await authServices.login({ email, password });
 
-        const userResponse = await authServices.me();
+    if (response.status === 200) {
+      toast.success("Logged in successfully");
+
+      // Store the token in localStorage
+      localStorage.setItem("token", response.data.token);
+
+      try {
+        const userResponse = await authServices.myprofile();
         dispatch(setUser(userResponse.data));
 
         dispatch(setEmail(""));
@@ -41,13 +46,19 @@ const Form = () => {
         setTimeout(() => {
           navigate("/", { replace: true });
         }, 500);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        toast.error("Failed to fetch user profile");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
+    } else {
+      toast.error("Login failed");
     }
-  };
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSwitch = () => {
     setIsLogin(!isLogin); 
