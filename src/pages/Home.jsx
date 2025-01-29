@@ -3,9 +3,8 @@ import React from "react";
 const Home = () => {
   return (
     <div
-      className="w-full h-screen bg-cover bg-center flex justify-center items-center"
+      className="w-full h-screen bg-cover bg-center flex justify-center items-center bg-[url(/Images/home.jpg)]"
       style={{
-        backgroundImage: 'url("/public/Images/home.jpg")',
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -16,8 +15,7 @@ const Home = () => {
         <p className="text-3xl mb-6">Welcome to the Recipe Sharing Platform!</p>
         <ul className="list-disc pl-5 text-3xl">
           <li>Click on the link above to register or login</li>
-          <li>After logging in,
-            you will be redirected to your dashboard</li>
+          <li>After logging in, you will be redirected to your dashboard</li>
           <li>You can then explore, share, and save recipes</li>
         </ul>
       </div>
