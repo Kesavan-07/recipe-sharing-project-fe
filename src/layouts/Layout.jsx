@@ -12,12 +12,7 @@ const Layout = ({ children }) => {
         <div>
           <Link to="/" className="mr-4">
             Home
-          </Link>
-          {!user && (
-            <Link to="/register" className="mr-4">
-              Register
-            </Link>
-          )}
+          </Link> 
           {!user && (
             <Link to="/login" className="mr-4">
               Login

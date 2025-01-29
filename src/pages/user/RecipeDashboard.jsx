@@ -1,21 +1,30 @@
-import React from "react";
-import { useLoaderData } from "react-router";
+import React, { useState, useEffect } from "react";
 import recipeServices from "../../services/recipeServices";
 import { toast } from "react-toastify";
+import Loader from "../../components/Loader";
 
 const RecipeDashboard = () => {
-  const recipes = useLoaderData(); 
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true); 
 
-  const handleRecipeSave = (recipeId) => {
-    recipeServices
-      .saveRecipe(recipeId) 
-      .then((res) => {
-        toast.success(res.data.message);
-      })
-      .catch((err) => {
-        toast.error(err.response?.data?.message || "An error occurred.");
-      });
-  };
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await recipeServices.getAllRecipes();
+        setRecipes(response.data);
+      } catch (error) {
+        toast.error("Failed to fetch recipes.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="p-4">
@@ -25,12 +34,6 @@ const RecipeDashboard = () => {
           <div key={recipe._id} className="border rounded p-3 mb-3">
             <h3>{recipe.title}</h3>
             <p>{recipe.description}</p>
-            <button
-              className="bg-green-500 text-white px-3 py-1 mt-2"
-              onClick={() => handleRecipeSave(recipe._id)}
-            >
-              Save Recipe
-            </button>
           </div>
         ))}
       </div>

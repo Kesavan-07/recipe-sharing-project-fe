@@ -11,7 +11,7 @@ const authServices = {
         return await instance.get('/auth/logout');
     },
     me: async () => {
-        return await instance.get('/auth/me');
+        return await instance.get('/auth/myprofile');
     }
 }
 

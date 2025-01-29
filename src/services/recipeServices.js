@@ -1,16 +1,16 @@
 import instance from "./instance";
 
 const recipeServices = {
+    createRecipe: async (data) => {
+        return await instance.post("/user/recipes", data);
+    },
+
   getAllRecipes: async () => {
     return await instance.get("/user/recipes");
   },
 
   getRecipeById: async (id) => {
     return await instance.get(`/user/recipes/${id}`);
-  },
-
-  saveRecipe: async (id) => {
-    return await instance.post(`/user/recipes/save/${id}`);
   },
 
   updateRecipe: async (id, data) => {
