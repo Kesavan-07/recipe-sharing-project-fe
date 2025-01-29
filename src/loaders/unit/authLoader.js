@@ -1,4 +1,4 @@
-import authServices from "../services/authServices";
+import authServices from "../../services/authServices";
 
 const authLoader = async () => {
   try {

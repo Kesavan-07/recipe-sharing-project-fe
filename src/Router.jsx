@@ -1,14 +1,15 @@
 import React from "react";
 import { createBrowserRouter } from "react-router";
 import App from "./App";
-import Home from "./pages/Home"; // Home page to display all recipes
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Logout from "./components/Logout";
-import RecipeDashboard from "./pages/user/RecipeDashboard"; // Restricted recipe creation
+import RecipeDashboard from "./pages/user/RecipeDashboard";
+import RecipeDetail from "./pages/RecipeDetail"; // ✅ Import Recipe Detail Page
 import recipesLoader from "./loaders/unit/recipesLoader";
+import authLoader from "./loaders/unit/authLoader";
 import Loader from "./components/Loader";
 
-// Updated routes configuration
 const routes = [
   {
     path: "/",
@@ -16,29 +17,25 @@ const routes = [
     children: [
       {
         path: "",
-        element: <Home />, // Publicly accessible Home page
-        loader: recipesLoader, // Fetch all recipes for the Home page
+        element: <Home />,
+        loader: recipesLoader,
       },
       { path: "login", element: <Login /> },
       { path: "logout", element: <Logout /> },
       {
         path: "dashboard",
-        element: <RecipeDashboard />, // Recipe creation restricted to logged-in users
-        loader: authLoader, // Ensure user is authenticated
+        element: <RecipeDashboard />,
+        loader: authLoader,
+      },
+      {
+        path: "recipe/:id", // ✅ Route for recipe details
+        element: <RecipeDetail />,
       },
     ],
     hydrateFallbackElement: <Loader />,
   },
 ];
 
-const router = createBrowserRouter(routes, {
-  future: {
-    v7_relativeSplatPath: true,
-    v7_fetcherPersist: true,
-    v7_normalizeFormMethod: true,
-    v7_partialHydration: true,
-    v7_skipActionErrorRevalidation: true,
-  },
-});
+const router = createBrowserRouter(routes);
 
 export default router;
