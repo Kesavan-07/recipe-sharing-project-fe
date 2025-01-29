@@ -1,51 +1,30 @@
 import React from "react";
 import { createBrowserRouter } from "react-router";
 import App from "./App";
-import Home from "./pages/Home";
+import Home from "./pages/Home"; // Home page to display all recipes
 import Login from "./pages/Login";
-import authLoader from "./loaders/unit/authLoader";
 import Logout from "./components/Logout";
-import RecipeDashboard from "./pages/user/RecipeDashboard";
+import RecipeDashboard from "./pages/user/RecipeDashboard"; // Restricted recipe creation
 import recipesLoader from "./loaders/unit/recipesLoader";
-import recipeLoader from "./loaders/unit/recipeLoader";
-import UserLayout from "./layouts/UserLayout";
-import Profile from "./pages/user/Profile"; 
-import MyRecipes from "./pages/user/MyRecipes"; 
 import Loader from "./components/Loader";
 
+// Updated routes configuration
 const routes = [
   {
     path: "/",
     element: <App />,
-    loader: authLoader,
     children: [
-      { path: "", element: <Home /> },
+      {
+        path: "",
+        element: <Home />, // Publicly accessible Home page
+        loader: recipesLoader, // Fetch all recipes for the Home page
+      },
       { path: "login", element: <Login /> },
       { path: "logout", element: <Logout /> },
       {
-        path: "user",
-        element: <UserLayout />,
-        loader: authLoader,
-        children: [
-          {
-            path: "dashboard",
-            element: <RecipeDashboard />,
-            loader: recipesLoader,
-          },
-          {
-            path: "profile", // ✅ Added Profile Route
-            element: <Profile />,
-          },
-          {
-            path: "recipes", // ✅ Added My Recipes Route
-            element: <MyRecipes />,
-          },
-          {
-            path: "recipes/:id",
-            element: <RecipeDashboard />,
-            loader: recipeLoader,
-          },
-        ],
+        path: "dashboard",
+        element: <RecipeDashboard />, // Recipe creation restricted to logged-in users
+        loader: authLoader, // Ensure user is authenticated
       },
     ],
     hydrateFallbackElement: <Loader />,
