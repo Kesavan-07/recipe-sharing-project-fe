@@ -1,25 +1,29 @@
-import instance from "./instance";
+const BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1/auth";
 
 const authServices = {
-  register: async (data) => {
-    return await instance.post("/api/v1/register", data);
-  },
-  login: async (data) => {
-    return await instance.post("/api/v1/login", data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  },
-  logout: async () => {
-    return await instance.post("/api/v1/logout");
-  },
-  myprofile: async () => {
-    const token = localStorage.getItem("token"); 
-    return await instance.get("/api/v1/myprofile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  register: async (data) =>
+    fetch(`${BASE_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }),
+
+  login: async (data) =>
+    fetch(`${BASE_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }),
+
+  logout: async () =>
+    fetch(`${BASE_URL}/logout`, {
+      method: "POST",
+    }),
+
+  myProfile: async () => {
+    const token = localStorage.getItem("token");
+    return fetch(`${BASE_URL}/me`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
   },
 };
