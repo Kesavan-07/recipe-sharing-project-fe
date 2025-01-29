@@ -54,6 +54,7 @@ const Form = () => {
 
   return (
     <StyledWrapper>
+      <div className="background"></div>
       <div className="wrapper">
         <div className="card-switch">
           <label className="switch">
@@ -146,6 +147,20 @@ const StyledWrapper = styled.div`
     align-items: center;
     flex-direction: column;
     height: 100%; /* Make sure wrapper takes up the full height */
+  }
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%; /* Use 100% height to cover the whole screen */
+    background: url("/public/Images/login.jpg") no-repeat
+      center;
+    background-size: cover;
+
+    z-index: -1; /* Place background behind the content */
   }
 
   /* switch card */

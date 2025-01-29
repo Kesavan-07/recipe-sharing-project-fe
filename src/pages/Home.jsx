@@ -5,13 +5,13 @@ const Home = () => {
     <div
       className="w-full h-screen bg-cover bg-center flex justify-center items-center"
       style={{
-        backgroundImage: 'url("/public/Images/round-board.jpg.webp")',
+        backgroundImage: 'url("/public/Images/home.jpg")',
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="text-center text-white p-8">
+      <div className="text-center text-black p-8">
         <h2 className="text-5xl mb-4">Home</h2>
         <p className="text-3xl mb-6">Welcome to the Recipe Sharing Platform!</p>
         <ul className="list-disc pl-5 text-3xl">
