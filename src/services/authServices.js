@@ -15,7 +15,7 @@ const authServices = {
     return await instance.post("/api/v1/logout");
   },
   myprofile: async () => {
-    const token = localStorage.getItem("token"); // Adjust this line based on how you store the token
+    const token = localStorage.getItem("token"); 
     return await instance.get("/api/v1/myprofile", {
       headers: {
         Authorization: `Bearer ${token}`,
