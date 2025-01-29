@@ -55,7 +55,7 @@ const Form = () => {
 
   return (
     <StyledWrapper>
-      <div className="background"></div>
+           <div className="background"></div>
       <div className="wrapper">
         <div className="card-switch">
           <label className="switch">
@@ -119,8 +119,7 @@ const Form = () => {
             </div>
           </label>
         </div>
-      </div>
-
+        </div>
       {/* Loader */}
       {loading && (
         <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
@@ -156,14 +155,11 @@ const StyledWrapper = styled.div`
     right: 0;
     bottom: 0;
     width: 100%;
-    height: 100%; /* Use 100% height to cover the whole screen */
-    background: url("/public/Images/login.jpg") no-repeat
-      center;
+    height: 100%;
+    background: url("/public/Images/login.jpg") no-repeat center;
     background-size: cover;
-
-    z-index: -1; /* Place background behind the content */
+    z-index: -1;
   }
-
   /* switch card */
   .switch {
     position: relative;
