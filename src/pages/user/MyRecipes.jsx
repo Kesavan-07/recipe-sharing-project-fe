@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; // For navigation
 import recipeServices from "../../services/recipeServices";
 
 const MyRecipes = () => {
   const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMyRecipes = async () => {
       try {
         const response = await recipeServices.getMyRecipes();
-
-        // Debugging
-        console.log("Fetched Recipes:", response);
-
+        console.log("Fetched My Recipes:", response);
         if (!response || response.length === 0) {
           setError("No recipes found.");
         } else {
@@ -29,18 +27,35 @@ const MyRecipes = () => {
     fetchMyRecipes();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Loading recipes...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div>
-      <h1>My Recipes</h1>
-      {recipes.map((recipe) => (
-        <div key={recipe._id}>
-          <h3>{recipe.title}</h3>
-          <p>{recipe.description}</p>
-        </div>
-      ))}
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold text-center mb-6">My Recipes</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {recipes.map((recipe) => (
+          <Link
+            to={`/recipe/${recipe._id}`} // Navigate to the recipe details page
+            key={recipe._id}
+            className="block bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition duration-300"
+          >
+            <img
+              src={recipe.image || "https://via.placeholder.com/150"} // Placeholder image if none is provided
+              alt={recipe.title}
+              className="w-full h-40 object-cover rounded-t-lg"
+            />
+            <div className="p-4">
+              <h2 className="text-lg font-bold text-gray-800">
+                {recipe.title}
+              </h2>
+              <p className="text-sm text-gray-600">
+                Cooking Time: {recipe.cookingTime} mins
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };

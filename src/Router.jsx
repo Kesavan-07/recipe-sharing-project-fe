@@ -5,10 +5,10 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Logout from "./components/Logout";
 import RecipeDashboard from "./pages/user/RecipeDashboard";
-import RecipeDetail from "./pages/RecipeDetail";
+import RecipeDetail from "./pages/RecipeDetail"; // ✅ Added RecipeDetail import
 import Profile from "./pages/user/Profile";
-import MyRecipes from "./pages/user/MyRecipes";
-import CreateRecipe from "./pages/CreateRecipe";
+import MyRecipes from "./pages/user/MyRecipes"; // ✅ MyRecipes for user's recipes
+import CreateRecipe from "./pages/CreateRecipe"; // ✅ CreateRecipe import
 import recipesLoader from "./loaders/unit/recipesLoader";
 import authLoader from "./loaders/unit/authLoader";
 import Loader from "./components/Loader";
@@ -39,18 +39,18 @@ const routes = [
             loader: authLoader,
           },
           {
-            path: "recipes", // ✅ Fixed the path
+            path: "recipes", // ✅ Path for My Recipes
             element: <MyRecipes />,
             loader: authLoader,
           },
         ],
       },
       {
-        path: "recipe/:id",
-        element: <RecipeDetail />,
+        path: "recipe/:id", // ✅ Dynamic route for Recipe Details
+        element: <RecipeDetail />, // Render RecipeDetail page
       },
       {
-        path: "create-recipe",
+        path: "create-recipe", // ✅ Route for Create Recipe
         element: <CreateRecipe />,
         loader: authLoader, // Ensuring only authenticated users can access
       },

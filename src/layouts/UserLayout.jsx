@@ -31,14 +31,18 @@ const UserLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-white">
+      {" "}
+      {/* Changed background to white */}
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white p-5 flex flex-col space-y-4">
+      <aside className="w-64 bg-gray-800 text-white p-5 flex flex-col space-y-4">
         <h2 className="text-2xl font-bold">User Panel</h2>
         <NavLink
           to="/user/dashboard"
           className={({ isActive }) =>
-            isActive ? "text-blue-400" : "text-white"
+            isActive
+              ? "text-blue-400 font-medium"
+              : "text-white font-medium hover:text-gray-400"
           }
         >
           📊 Dashboard
@@ -46,7 +50,9 @@ const UserLayout = () => {
         <NavLink
           to="/user/profile"
           className={({ isActive }) =>
-            isActive ? "text-blue-400" : "text-white"
+            isActive
+              ? "text-blue-400 font-medium"
+              : "text-white font-medium hover:text-gray-400"
           }
         >
           👤 Profile
@@ -54,13 +60,14 @@ const UserLayout = () => {
         <NavLink
           to="/user/recipes"
           className={({ isActive }) =>
-            isActive ? "text-blue-400" : "text-white"
+            isActive
+              ? "text-blue-400 font-medium"
+              : "text-white font-medium hover:text-gray-400"
           }
         >
           🍽 My Recipes
         </NavLink>
       </aside>
-
       {/* Main Content */}
       <main className="flex-grow p-6">
         <Outlet /> {/* Renders nested routes */}

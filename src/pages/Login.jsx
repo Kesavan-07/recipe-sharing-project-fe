@@ -36,7 +36,7 @@ const Form = () => {
     }
 
     try {
-      const data = await authServices.login({ email, password }); // ✅ No need for response.json()
+      const data = await authServices.login({ email, password }); 
 
       if (data.token) {
         localStorage.setItem("token", data.token);
@@ -44,7 +44,7 @@ const Form = () => {
         toast.success("Login successful");
 
         setTimeout(() => {
-          navigate("/user/dashboard"); // ✅ Ensure correct path
+          navigate("/user/dashboard"); 
         }, 500);
       } else {
         throw new Error("Invalid credentials");
@@ -59,7 +59,6 @@ const Form = () => {
   };
 
 
-  // Handle Signup (currently just a placeholder, needs backend implementation)
   const handleSignup = async (e) => {
     e.preventDefault();
     toast.info("Signup functionality coming soon!");
@@ -71,7 +70,7 @@ const Form = () => {
 
   return (
     <StyledWrapper>
-      <div className="background"></div>
+      <div className="background"> </div>
       <div className="wrapper">
         <div className="card-switch">
           <label className="switch">
@@ -145,7 +144,6 @@ const Form = () => {
           </label>
         </div>
       </div>
-
       {/* Loader */}
       {loading && (
         <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
@@ -160,8 +158,8 @@ const StyledWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Ensures full screen height */
-  margin: 0; /* Remove any margin */
+  height: 50vh;
+
   .wrapper {
     --input-focus: #2d8cf0;
     --font-color: #323232;
@@ -174,18 +172,7 @@ const StyledWrapper = styled.div`
     flex-direction: column;
     height: 100%; /* Make sure wrapper takes up the full height */
   }
-  .background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100vh;
-    background: url("/Images/login.jpg") no-repeat center;
-    background-size: cover;
-    z-index: -1;
-  }
+
   /* switch card */
   .switch {
     position: relative;
@@ -324,6 +311,14 @@ const StyledWrapper = styled.div`
     font-weight: 600;
     color: var(--font-color);
     cursor: pointer;
+  }
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url("/Images/login.jpg") no-repeat center center/cover;
   }
 `;
 
