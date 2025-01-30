@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import recipeServices from "../services/recipeServices";
-import Loader from "../components/Loader";
-import RatingComponent from "../components/Rating";
-import CommentSection from "../components/CommentSection";
 
 const RecipeDetail = () => {
   const { id } = useParams();
@@ -11,21 +8,17 @@ const RecipeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState(false);
+  const [newComment, setNewComment] = useState(""); // State for new comment
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         const response = await recipeServices.getRecipeById(id);
-        if (!response) {
-          throw new Error("Recipe details not found.");
-        }
         setRecipe(response);
-
-        // Check if the current user has liked the recipe
         const currentUserId = localStorage.getItem("userId");
         setLiked(response.likes?.includes(currentUserId) || false);
       } catch (err) {
-        console.error("Error fetching recipe details:", err.message || err);
+        console.error(err);
         setError("Failed to load recipe details.");
       } finally {
         setLoading(false);
@@ -35,88 +28,138 @@ const RecipeDetail = () => {
   }, [id]);
 
   const handleLike = async () => {
-     try {
-       const userId = localStorage.getItem("userId");
-       console.log("Current User ID:", userId); // Debugging
+    try {
+      const userId = localStorage.getItem("userId"); // Get logged-in user ID
+      if (!userId) {
+        alert("Please log in to like the recipe.");
+        return;
+      }
 
-       if (!userId) {
-         alert("You need to be logged in to like a recipe.");
-         return;
-       }
-
-       // Call backend to like/unlike the recipe
-       const updatedRecipe = await recipeServices.likeRecipe(id, userId);
-       setLiked(!liked); // Toggle liked state
-       setRecipe(updatedRecipe); // Update recipe state
-     } catch (err) {
-       console.error("Error liking recipe:", err.message || err);
-       alert("Failed to like the recipe.");
-     }
+      const updatedRecipe = await recipeServices.likeRecipe(id, userId);
+      setLiked(!liked); // Toggle the like state
+      setRecipe(updatedRecipe); // Update the recipe with the new like count
+    } catch (error) {
+      console.error("Error liking recipe:", error.message || error);
+      alert("Failed to like the recipe. Please try again.");
+    }
   };
 
-  if (loading) return <Loader />;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  const handleComment = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("Please log in to comment.");
+        return;
+      }
+
+      if (!newComment.trim()) {
+        alert("Comment cannot be empty.");
+        return;
+      }
+
+      const commentData = { userId, text: newComment }; // Example comment data
+      const updatedRecipe = await recipeServices.addComment(id, commentData);
+
+      setRecipe(updatedRecipe); // Update recipe with new comments
+      setNewComment(""); // Clear the input field
+    } catch (error) {
+      console.error("Error adding comment:", error.message || error);
+      alert("Failed to add comment. Please try again.");
+    }
+  };
+
+  const handleShare = () => {
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        alert("Recipe link copied to clipboard!");
+      })
+      .catch((error) => {
+        console.error("Failed to copy link:", error.message || error);
+        alert("Failed to copy link. Please try manually.");
+      });
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   if (!recipe) return null;
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        {recipe.title || "Recipe"}
-      </h1>
-      <div className="max-w-3xl mx-auto">
-        <img
-          src={recipe.image || "https://via.placeholder.com/500"}
-          alt={recipe.title || "Recipe"}
-          className="w-full h-64 object-cover rounded-lg mb-4"
-        />
-        <button
-          onClick={handleLike}
-          className="flex flex-col items-center cursor-pointer"
+      <h1 className="text-3xl font-bold text-center mb-6">{recipe.title}</h1>
+      <img
+        src={recipe.image || "https://via.placeholder.com/500"}
+        alt={recipe.title}
+        className="w-full h-64 object-cover rounded-lg mb-4"
+      />
+
+      {/* Instagram-like Like, Comment, and Share Section */}
+      <div className="flex items-center justify-between max-w-md mx-auto py-4">
+        {/* Like Button */}
+        <div className="flex items-center cursor-pointer" onClick={handleLike}>
+          <img
+            src={liked ? "/Images/like.png" : "/Images/liked.png"}
+            alt="Like"
+            className="w-6 h-6 mr-2"
+          />
+          <span>{liked ? "Liked" : "Like"}</span>
+        </div>
+
+        {/* Comment Button */}
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => alert("Use the comment input below!")} // Placeholder for now
         >
           <img
-            src={liked ? "/public/Images/love.png" : "/Images/heart.png"}
-            alt={liked ? "Liked" : "Like"}
-            className="w-8 h-8"
+            src="/Images/comment.png"
+            alt="Comment"
+            className="w-6 h-6 mr-2"
           />
-          <span className="text-gray-600">{liked ? "Liked" : "Like"}</span>
-        </button>
+          <span>Comment</span>
+        </div>
 
-        <p className="text-gray-800 mb-4">
-          <strong>Cooking Time:</strong> {recipe.cookingTime || "N/A"} minutes
-        </p>
-        <p className="text-gray-800 mb-4">
-          <strong>Servings:</strong> {recipe.servings || "N/A"}
-        </p>
+        {/* Share Button */}
+        <div className="flex items-center cursor-pointer" onClick={handleShare}>
+          <img src="/Images/share.png" alt="Share" className="w-6 h-6 mr-2" />
+          <span>Share</span>
+        </div>
+      </div>
+
+      {/* Likes and Comments Count */}
+      <div className="max-w-md mx-auto py-2">
+        <p className="font-bold">{recipe.likes?.length || 0} likes</p>
+        <p className="text-gray-600">{recipe.comments?.length || 0} comments</p>
+      </div>
+
+      {/* Add Comment Section */}
+      <div className="max-w-md mx-auto py-4">
+        <input
+          type="text"
+          placeholder="Add a comment..."
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="border p-2 w-full rounded"
+        />
+        <button
+          onClick={handleComment} // Call the comment handler
+          className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
+        >
+          Post
+        </button>
+      </div>
+
+      {/* Recipe Details */}
+      <div className="max-w-md mx-auto">
         <h2 className="text-xl font-bold mb-2">Ingredients:</h2>
         <ul className="list-disc list-inside mb-4">
-          {recipe.ingredients?.length > 0 ? (
-            recipe.ingredients.map((ingredient, index) => (
-              <li key={index} className="text-gray-700">
-                {ingredient}
-              </li>
-            ))
-          ) : (
-            <p className="text-gray-600">No ingredients listed.</p>
-          )}
+          {recipe.ingredients?.map((ingredient, index) => (
+            <li key={index}>{ingredient}</li>
+          ))}
         </ul>
+
         <h2 className="text-xl font-bold mb-2">Instructions:</h2>
-        <p className="text-gray-700 mb-4">
-          {recipe.instructions || "No instructions available."}
-        </p>
-        {recipe.video && (
-          <div className="mt-6">
-            <h2 className="text-xl font-bold mb-2">Video Tutorial:</h2>
-            <iframe
-              src={recipe.video}
-              title={`${recipe.title || "Recipe"} Tutorial`}
-              className="w-full h-64 rounded-lg"
-              allowFullScreen
-            ></iframe>
-          </div>
-        )}
+        <p>{recipe.instructions}</p>
       </div>
-      <RatingComponent recipeId={id} />
-      <CommentSection recipeId={id} comments={recipe.comments || []} />
     </div>
   );
 };

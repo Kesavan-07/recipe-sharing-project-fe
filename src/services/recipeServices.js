@@ -96,7 +96,18 @@ const recipeServices = {
     } catch (error) {
       console.error("Error adding comment:", error.response?.data || error);
     }
-  },
+    },
+  likeRecipe : async (recipeId, userId) => {
+  try {
+    const response = await axios.post(`${API_URL}/${recipeId}/like`, {
+      userId,
+    });
+    return response.data; // Return the updated recipe
+  } catch (error) {
+    console.error("Error liking recipe:", error.message || error);
+    throw error;
+  }
+},
 };
 
 export default recipeServices;

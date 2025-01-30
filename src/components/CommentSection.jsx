@@ -5,18 +5,19 @@ const CommentSection = ({ recipeId, comments = [] }) => {
   const [newComment, setNewComment] = useState("");
   const [allComments, setAllComments] = useState(comments || []);
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    const handleAddComment = async () => {
+   try {
+     const userId = localStorage.getItem("userId");
+     const comment = { userId, text: newComment }; // Assuming `newComment` is the input value
+     const updatedRecipe = await recipeServices.addComment(recipeId, comment);
 
-    try {
-      const response = await recipeServices.addComment(recipeId, newComment);
-      setAllComments([...allComments, response.comment]);
-      setNewComment("");
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      alert("Failed to add comment.");
-    }
-  };
+     setComments(updatedRecipe.comments); // Update state with new comments
+     setNewComment(""); // Clear the input field
+   } catch (error) {
+     console.error("Error adding comment:", error.message || error);
+     alert("Failed to add comment. Please try again.");
+   }
+ };
 
   return (
     <div className="mt-6">
