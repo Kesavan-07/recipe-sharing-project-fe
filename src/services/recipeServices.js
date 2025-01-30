@@ -29,23 +29,18 @@ const recipeServices = {
   getMyRecipes: async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found.");
-      }
-
-      const response = await instance.get(`${BASE_URL}/my-recipes`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get(`${API_BASE_URL}/recipes/my-recipes`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Pass token for authentication
+        },
       });
-
-      console.log("📌 My Recipes API Response:", response.data);
-      if (Array.isArray(response.data)) {
-        return response.data;
-      } else {
-        throw new Error("Unexpected API response format.");
-      }
+      return response.data; // Return the array of recipes
     } catch (error) {
-      console.error("❌ Error fetching my recipes:", error);
-      return [];
+      console.error(
+        "Error fetching recipes:",
+        error.response?.data || error.message
+      );
+      return []; // Return an empty array on error
     }
   },
 

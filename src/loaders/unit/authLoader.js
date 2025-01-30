@@ -7,13 +7,13 @@ const authLoader = async () => {
 
     if (!userData) {
       console.warn("No user data received from API");
-      throw new Error("User data is null or undefined"); // ✅ Ensure the error is handled properly
+      throw new Error("User data is null or undefined");
     }
 
     // Validate required fields
     if (!userData._id || !userData.username) {
       console.warn("Invalid user data structure:", userData);
-      throw new Error("Invalid user data format"); // ✅ Force error if structure is incorrect
+      throw new Error("Invalid user data format");
     }
 
     // Assign default role if missing
@@ -25,7 +25,7 @@ const authLoader = async () => {
     return userData; // ✅ Return valid user data
   } catch (error) {
     console.error("AuthLoader Error:", error.message || "Unknown error");
-    return null; // ✅ Ensure failure is handled properly
+    throw error; // Rethrow error to prevent access to routes
   }
 };
 

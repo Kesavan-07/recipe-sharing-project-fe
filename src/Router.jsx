@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom"; // Fixed typo in `react-router-dom`
 import App from "./App";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -8,7 +8,7 @@ import RecipeDashboard from "./pages/user/RecipeDashboard";
 import RecipeDetail from "./pages/RecipeDetail";
 import Profile from "./pages/user/Profile";
 import MyRecipes from "./pages/user/MyRecipes";
-import CreateRecipe from "./pages/CreateRecipe"; // ✅ Imported CreateRecipe Page
+import CreateRecipe from "./pages/CreateRecipe";
 import recipesLoader from "./loaders/unit/recipesLoader";
 import authLoader from "./loaders/unit/authLoader";
 import Loader from "./components/Loader";
@@ -39,7 +39,7 @@ const routes = [
             loader: authLoader,
           },
           {
-            path: "my-recipes",
+            path: "recipes", // ✅ Fixed the path
             element: <MyRecipes />,
             loader: authLoader,
           },
@@ -50,7 +50,7 @@ const routes = [
         element: <RecipeDetail />,
       },
       {
-        path: "create-recipe", // ✅ New Route for Creating Recipes
+        path: "create-recipe",
         element: <CreateRecipe />,
         loader: authLoader, // Ensuring only authenticated users can access
       },
