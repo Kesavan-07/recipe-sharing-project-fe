@@ -99,11 +99,18 @@ const recipeServices = {
     }
     },
   likeRecipe : async (recipeId, userId) => {
+  const token = localStorage.getItem("token"); // Retrieve the token from localStorage
   try {
-    const response = await axios.post(`${API_BASE_URL}/${recipeId}/like`, {
-      userId,
-    });
-    return response.data; 
+    const response = await axios.post(
+      `${API_BASE_URL}/${recipeId}/like`,
+      { userId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Set the token in the Authorization header
+        },
+      }
+    );
+    return response.data; // Return the updated recipe
   } catch (error) {
     console.error("Error liking recipe:", error.message || error);
     throw error;

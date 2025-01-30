@@ -42,7 +42,6 @@ const RecipeDetail = () => {
       setRecipe(updatedRecipe); // Update the recipe with the new like count
     } catch (error) {
       console.error("Error liking recipe:", error.message || error);
-      alert("Failed to like the recipe. Please try again.");
     }
   };
 
