@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import authServices from "../../services/authServices";
+import { updateProfile } from "../../redux/features/auth/userSlice";
 import axios from "axios";
+import Button from "../../components/Button";
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", bio: "" });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -21,6 +27,11 @@ const Profile = () => {
           setUser(response);
           setFollowers(response.followers || []);
           setFollowing(response.following || []);
+          setFormData({
+            name: response.name,
+            email: response.email,
+            bio: response.bio || "",
+          });
         } else {
           console.warn("Invalid profile data structure:", response);
           setError("Failed to load profile.");
@@ -47,6 +58,15 @@ const Profile = () => {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = () => {
+    dispatch(updateProfile(formData));
+    setEditMode(false);
+  };
+
   if (loading) return <p>Loading profile...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
@@ -62,10 +82,44 @@ const Profile = () => {
             alt="Profile"
             className="w-32 h-32 rounded-full mx-auto"
           />
-          <h2 className="text-xl font-semibold text-center mt-2">
-            {user.username}
-          </h2>
-          <p className="text-gray-600 text-center">{user.email}</p>
+          {!editMode ? (
+            <>
+              <h2 className="text-xl font-semibold text-center mt-2">
+                {user.username}
+              </h2>
+              <p className="text-gray-600 text-center">{user.email}</p>
+              <p className="text-gray-600 text-center">
+                {user.bio || "No bio available"}
+              </p>
+              <Button className="mt-3" onClick={() => setEditMode(true)}>
+                Edit Profile
+              </Button>
+            </>
+          ) : (
+            <>
+              <input
+                className="w-full p-2 border rounded"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+              <input
+                className="w-full p-2 border rounded mt-2"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <textarea
+                className="w-full p-2 border rounded mt-2"
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+              ></textarea>
+              <Button className="mt-3" onClick={handleUpdate}>
+                Save
+              </Button>
+            </>
+          )}
           <div className="mt-4">
             <h3 className="text-lg font-bold">Followers</h3>
             <ul>
@@ -86,7 +140,8 @@ const Profile = () => {
               accept="image/*"
               onChange={(e) => setProfileImage(e.target.files[0])}
             />
-            <button
+            <Button
+              className="block w-full mt-2 bg-gray-900 text-white p-2 rounded"
               onClick={async () => {
                 if (profileImage) {
                   const formData = new FormData();
@@ -96,10 +151,9 @@ const Profile = () => {
                   window.location.reload();
                 }
               }}
-              className="block w-full mt-2 bg-gray-900 text-white p-2 rounded"
             >
               Upload Profile Picture
-            </button>
+            </Button>
           </div>
         </div>
       )}
