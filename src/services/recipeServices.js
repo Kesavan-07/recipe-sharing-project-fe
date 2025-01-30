@@ -1,11 +1,12 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1";
+const API_BASE_URL =
+  "https://recipe-sharing-project-be.onrender.com/api/v1/recipes";
 
 const recipeServices = {
   getAllRecipes: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/recipes/all`);
+      const response = await axios.get(`${API_BASE_URL}/all`);
       return response.data;
     } catch (error) {
       console.error("Error fetching all recipes:", error);
@@ -16,7 +17,7 @@ const recipeServices = {
   getMyRecipes: async () => {
     try {
       const token = localStorage.getItem("token"); // Ensure token is retrieved
-      const response = await axios.get(`${API_BASE_URL}/recipes/my-recipes`, {
+      const response = await axios.get(`${API_BASE_URL}/my-recipes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
@@ -33,7 +34,7 @@ const recipeServices = {
   getRecipeById: async (id) => {
     try {
       const token = localStorage.getItem("token"); // Retrieve token
-      const response = await axios.get(`${API_BASE_URL}/recipes/${id}`, {
+      const response = await axios.get(`${API_BASE_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response || !response.data) {
@@ -53,7 +54,7 @@ const recipeServices = {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${API_BASE_URL}/recipes/create`,
+        `${API_BASE_URL}/create`,
         data,
         {
           headers: {
@@ -99,10 +100,10 @@ const recipeServices = {
     },
   likeRecipe : async (recipeId, userId) => {
   try {
-    const response = await axios.post(`${API_URL}/${recipeId}/like`, {
+    const response = await axios.post(`${API_BASE_URL}/${recipeId}/like`, {
       userId,
     });
-    return response.data; // Return the updated recipe
+    return response.data; 
   } catch (error) {
     console.error("Error liking recipe:", error.message || error);
     throw error;

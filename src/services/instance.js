@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://recipe-sharing-project-be.onrender.com";
+const API_BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1";
 
 const instance = axios.create({
   API_BASE_URL,

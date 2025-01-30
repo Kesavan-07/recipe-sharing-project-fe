@@ -8,7 +8,8 @@ const RecipeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState(false);
-  const [newComment, setNewComment] = useState(""); // State for new comment
+  const [newComment, setNewComment] = useState(""); 
+  const [showComments, setShowComments] = useState(false); 
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -29,7 +30,8 @@ const RecipeDetail = () => {
 
   const handleLike = async () => {
     try {
-      const userId = localStorage.getItem("userId"); // Get logged-in user ID
+        const userId = localStorage.getItem("userId");
+      console.log("User ID:", userId);
       if (!userId) {
         alert("Please log in to like the recipe.");
         return;
@@ -57,7 +59,7 @@ const RecipeDetail = () => {
         return;
       }
 
-      const commentData = { userId, text: newComment }; // Example comment data
+      const commentData = { userId, text: newComment };
       const updatedRecipe = await recipeServices.addComment(id, commentData);
 
       setRecipe(updatedRecipe); // Update recipe with new comments
@@ -88,7 +90,7 @@ const RecipeDetail = () => {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">{recipe.title}</h1>
       <img
-        src={recipe.image || "https://via.placeholder.com/500"}
+        src={recipe.image || "/public/Images/cake.jpg"}
         alt={recipe.title}
         className="w-full h-64 object-cover rounded-lg mb-4"
       />
@@ -108,7 +110,7 @@ const RecipeDetail = () => {
         {/* Comment Button */}
         <div
           className="flex items-center cursor-pointer"
-          onClick={() => alert("Use the comment input below!")} // Placeholder for now
+          onClick={() => setShowComments(!showComments)} // Toggle comments
         >
           <img
             src="/Images/comment.png"
@@ -120,7 +122,7 @@ const RecipeDetail = () => {
 
         {/* Share Button */}
         <div className="flex items-center cursor-pointer" onClick={handleShare}>
-          <img src="/Images/share.png" alt="Share" className="w-6 h-6 mr-2" />
+          <img src="/public/share.png" alt="Share" className="w-6 h-6 mr-2" />
           <span>Share</span>
         </div>
       </div>
@@ -131,22 +133,24 @@ const RecipeDetail = () => {
         <p className="text-gray-600">{recipe.comments?.length || 0} comments</p>
       </div>
 
-      {/* Add Comment Section */}
-      <div className="max-w-md mx-auto py-4">
-        <input
-          type="text"
-          placeholder="Add a comment..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="border p-2 w-full rounded"
-        />
-        <button
-          onClick={handleComment} // Call the comment handler
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-        >
-          Post
-        </button>
-      </div>
+      {/* Conditional Rendering for Comment Section */}
+      {showComments && (
+        <div className="max-w-md mx-auto py-4">
+          <input
+            type="text"
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            className="border p-2 w-full rounded"
+          />
+          <button
+            onClick={handleComment} // Call the comment handler
+            className="bg-gray-800 text-white px-4 py-2 rounded mt-2"
+          >
+            Post
+          </button>
+        </div>
+      )}
 
       {/* Recipe Details */}
       <div className="max-w-md mx-auto">
