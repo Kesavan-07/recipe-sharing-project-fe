@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import authServices from "../../services/authServices";
 import { updateProfile } from "../../redux/features/auth/userSlice";
-import axios from "axios";
 import Button from "../../components/Button";
 
 const Profile = () => {
@@ -62,9 +61,17 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleUpdate = () => {
-    dispatch(updateProfile(formData));
-    setEditMode(false);
+  // ✅ Updated to use Redux `updateProfile` action
+  const handleUpdate = async () => {
+    try {
+      await dispatch(updateProfile(formData)).unwrap();
+      alert("Profile updated successfully!");
+      setEditMode(false);
+      window.location.reload();
+    } catch (err) {
+      console.error("Profile update failed:", err);
+      alert("Failed to update profile.");
+    }
   };
 
   if (loading) return <p>Loading profile...</p>;

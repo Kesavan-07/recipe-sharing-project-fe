@@ -5,11 +5,11 @@ import {
   selectPassword,
   setEmail,
   setPassword,
-} from "../redux/features/auth/loginSlice";
+  setUser,
+} from "../redux/features/auth/userSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
 import authServices from "../services/authServices";
-import { setUser } from "../redux/features/auth/userSlice";
 import Loader from "../components/Loader";
 import styled from "styled-components";
 
@@ -19,11 +19,9 @@ const Form = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
   const [isLogin, setIsLogin] = useState(true);
 
-
-  
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -36,15 +34,20 @@ const Form = () => {
     }
 
     try {
-      const data = await authServices.login({ email, password }); 
+      const data = await authServices.login({ email, password });
 
       if (data.token) {
+        // Store token and user ID in localStorage
         localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.user._id); // ✅ Store userId for actions like "like"
+
+        // Dispatch user details to Redux
         dispatch(setUser(data.user));
         toast.success("Login successful");
 
+        // Navigate to the dashboard after login
         setTimeout(() => {
-          navigate("/user/dashboard"); 
+          navigate("/user/dashboard");
         }, 500);
       } else {
         throw new Error("Invalid credentials");
@@ -57,7 +60,6 @@ const Form = () => {
       setLoading(false);
     }
   };
-
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -83,7 +85,6 @@ const Form = () => {
             <span className="slider" />
             <span className="card-side" />
             <div className="flip-card__inner">
-              {/* Login Form */}
               <div className="flip-card__front">
                 <div className="title">Log in</div>
                 <form className="flip-card__form" onSubmit={handleLogin}>
@@ -105,15 +106,13 @@ const Form = () => {
                     onChange={(e) => dispatch(setPassword(e.target.value))}
                     required
                   />
-                  {error && <p style={{ color: "red" }}>{error}</p>}{" "}
-                  {/* ✅ Show error message */}
+                  {error && <p style={{ color: "red" }}>{error}</p>}
                   <button className="flip-card__btn" type="submit">
                     {loading ? "Logging in..." : "Let’s go!"}
                   </button>
                 </form>
               </div>
 
-              {/* Signup Form */}
               <div className="flip-card__back">
                 <div className="title">Sign up</div>
                 <form className="flip-card__form" onSubmit={handleSignup}>
@@ -144,7 +143,6 @@ const Form = () => {
           </label>
         </div>
       </div>
-      {/* Loader */}
       {loading && (
         <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
           <Loader />

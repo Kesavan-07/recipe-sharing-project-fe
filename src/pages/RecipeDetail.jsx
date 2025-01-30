@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import recipeServices from "../services/recipeServices";
-import Loader from "../components/Loader"; // Import Loader
+import Loader from "../components/Loader";
 import RatingComponent from "../components/Rating";
 import CommentSection from "../components/CommentSection";
 
@@ -16,7 +16,6 @@ const RecipeDetail = () => {
     const fetchRecipe = async () => {
       try {
         const response = await recipeServices.getRecipeById(id);
-        console.log("Fetched Recipe Response:", response);
         if (!response) {
           throw new Error("Recipe details not found.");
         }
@@ -24,7 +23,7 @@ const RecipeDetail = () => {
 
         // Check if the current user has liked the recipe
         const currentUserId = localStorage.getItem("userId");
-        setLiked(response.likes.includes(currentUserId));
+        setLiked(response.likes?.includes(currentUserId) || false);
       } catch (err) {
         console.error("Error fetching recipe details:", err.message || err);
         setError("Failed to load recipe details.");
@@ -36,19 +35,23 @@ const RecipeDetail = () => {
   }, [id]);
 
   const handleLike = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("You need to be logged in to like a recipe.");
-        return;
-      }
+     try {
+       const userId = localStorage.getItem("userId");
+       console.log("Current User ID:", userId); // Debugging
 
-      await recipeServices.likeRecipe(id, userId);
-      setLiked(!liked); // Toggle liked status
-    } catch (err) {
-      console.error("Error liking recipe:", err.message || err);
-      alert("Failed to like the recipe.");
-    }
+       if (!userId) {
+         alert("You need to be logged in to like a recipe.");
+         return;
+       }
+
+       // Call backend to like/unlike the recipe
+       const updatedRecipe = await recipeServices.likeRecipe(id, userId);
+       setLiked(!liked); // Toggle liked state
+       setRecipe(updatedRecipe); // Update recipe state
+     } catch (err) {
+       console.error("Error liking recipe:", err.message || err);
+       alert("Failed to like the recipe.");
+     }
   };
 
   if (loading) return <Loader />;
@@ -68,12 +71,16 @@ const RecipeDetail = () => {
         />
         <button
           onClick={handleLike}
-          className={`px-4 py-2 rounded ${
-            liked ? "bg-red-500 text-white" : "bg-gray-300 text-black"
-          }`}
+          className="flex flex-col items-center cursor-pointer"
         >
-          {liked ? "Unlike" : "Like"}
+          <img
+            src={liked ? "/public/Images/love.png" : "/Images/heart.png"}
+            alt={liked ? "Liked" : "Like"}
+            className="w-8 h-8"
+          />
+          <span className="text-gray-600">{liked ? "Liked" : "Like"}</span>
         </button>
+
         <p className="text-gray-800 mb-4">
           <strong>Cooking Time:</strong> {recipe.cookingTime || "N/A"} minutes
         </p>
@@ -82,8 +89,8 @@ const RecipeDetail = () => {
         </p>
         <h2 className="text-xl font-bold mb-2">Ingredients:</h2>
         <ul className="list-disc list-inside mb-4">
-          {recipe.Ingredients?.length > 0 ? (
-            recipe.Ingredients.map((ingredient, index) => (
+          {recipe.ingredients?.length > 0 ? (
+            recipe.ingredients.map((ingredient, index) => (
               <li key={index} className="text-gray-700">
                 {ingredient}
               </li>
@@ -109,7 +116,7 @@ const RecipeDetail = () => {
         )}
       </div>
       <RatingComponent recipeId={id} />
-      <CommentSection recipeId={id} comments={recipe.comments} />
+      <CommentSection recipeId={id} comments={recipe.comments || []} />
     </div>
   );
 };
