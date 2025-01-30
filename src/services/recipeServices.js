@@ -16,7 +16,7 @@ const recipeServices = {
 
   getMyRecipes: async () => {
     try {
-      const token = localStorage.getItem("token"); // Ensure token is retrieved
+      const token = localStorage.getItem("token");
       const response = await axios.get(`${API_BASE_URL}/my-recipes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -24,51 +24,39 @@ const recipeServices = {
     } catch (error) {
       console.error(
         "Error fetching my recipes:",
-        error.response?.data || error.message
+        error.response?.data || error
       );
       return [];
     }
   },
 
-  // ✅ Fixed function to include token retrieval
   getRecipeById: async (id) => {
     try {
-      const token = localStorage.getItem("token"); // Retrieve token
+      const token = localStorage.getItem("token");
       const response = await axios.get(`${API_BASE_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response || !response.data) {
-        throw new Error("No data returned from API.");
-      }
-      return response.data; // Return recipe details
-    } catch (error) {
-      console.error(
-        "Error fetching recipe by ID:",
-        error.response?.data || error.message
-      );
-      throw error; // Ensure error is caught in the caller
-    }
-  },
-
-  createRecipe: async (data) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `${API_BASE_URL}/create`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
       return response.data;
     } catch (error) {
       console.error(
-        "Error creating recipe:",
-        error.response?.data || error.message
+        "Error fetching recipe by ID:",
+        error.response?.data || error
       );
+      throw error;
+    }
+  },
+
+  createRecipe: async (formData) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/create`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating recipe:", error.response || error.message);
       throw error;
     }
   },
@@ -76,7 +64,7 @@ const recipeServices = {
   addRating: async (recipeId, rating) => {
     try {
       const token = localStorage.getItem("token");
-      return await instance.post(
+      return await axios.post(
         `${API_BASE_URL}/rate`,
         { recipeId, rating },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -89,7 +77,7 @@ const recipeServices = {
   addComment: async (recipeId, text) => {
     try {
       const token = localStorage.getItem("token");
-      return await instance.post(
+      return await axios.post(
         `${API_BASE_URL}/comment`,
         { recipeId, text },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -97,25 +85,26 @@ const recipeServices = {
     } catch (error) {
       console.error("Error adding comment:", error.response?.data || error);
     }
-    },
-  likeRecipe : async (recipeId, userId) => {
-  const token = localStorage.getItem("token"); // Retrieve the token from localStorage
-  try {
-    const response = await axios.post(
-      `${API_BASE_URL}/${recipeId}/like`,
-      { userId },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // Set the token in the Authorization header
-        },
-      }
-    );
-    return response.data; // Return the updated recipe
-  } catch (error) {
-    console.error("Error liking recipe:", error.message || error);
-    throw error;
-  }
-},
+  },
+
+  likeRecipe: async (recipeId, userId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/${recipeId}/like`,
+        { userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error liking recipe:", error.message || error);
+      throw error;
+    }
+  },
 };
 
 export default recipeServices;

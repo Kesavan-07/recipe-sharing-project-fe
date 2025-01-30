@@ -10,7 +10,8 @@ const RecipeDashboard = () => {
     instructions: "",
     cookingTime: "",
     servings: "",
-    image: "",
+    image: null, // Updated to support file uploads
+    video: null, // Optional: Added for video uploads
   });
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,11 @@ const RecipeDashboard = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setRecipeData({ ...recipeData, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    setRecipeData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value, // Handle file uploads
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -26,19 +31,30 @@ const RecipeDashboard = () => {
     setLoading(true);
     setError(null);
 
+    // Create FormData for file uploads
+    const formData = new FormData();
+    formData.append("title", recipeData.title);
+    formData.append("ingredients", recipeData.ingredients);
+    formData.append("instructions", recipeData.instructions);
+    formData.append("cookingTime", recipeData.cookingTime);
+    formData.append("servings", recipeData.servings);
+    if (recipeData.image) formData.append("image", recipeData.image);
+    if (recipeData.video) formData.append("video", recipeData.video);
+
     try {
-      await recipeServices.createRecipe(recipeData);
-      setSuccess(true); // ✅ Show success notification
-      setTimeout(() => setSuccess(false), 5000); // ✅ Hide after 5s
+      await recipeServices.createRecipe(formData);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 5000);
       setRecipeData({
         title: "",
         ingredients: "",
         instructions: "",
         cookingTime: "",
         servings: "",
-        image: "",
+        image: null,
+        video: null,
       });
-      navigate("/"); // ✅ Redirect to Home after creating
+      navigate("/"); // Redirect to Home
     } catch (err) {
       setError("Failed to create recipe.");
       console.error("❌ Error creating recipe:", err);
@@ -101,10 +117,8 @@ const RecipeDashboard = () => {
           required
         />
         <input
-          type="text"
+          type="file"
           name="image"
-          placeholder="Image URL"
-          value={recipeData.image}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
