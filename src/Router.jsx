@@ -8,6 +8,7 @@ import RecipeDashboard from "./pages/user/RecipeDashboard";
 import RecipeDetail from "./pages/RecipeDetail";
 import Profile from "./pages/user/Profile";
 import MyRecipes from "./pages/user/MyRecipes";
+import CreateRecipe from "./pages/CreateRecipe"; // ✅ Imported CreateRecipe Page
 import recipesLoader from "./loaders/unit/recipesLoader";
 import authLoader from "./loaders/unit/authLoader";
 import Loader from "./components/Loader";
@@ -25,7 +26,7 @@ const routes = [
       { path: "login", element: <Login /> },
       { path: "logout", element: <Logout /> },
       {
-        path: "user", // ✅ Ensuring user routes are grouped properly
+        path: "user", // ✅ Grouping user-related routes
         children: [
           {
             path: "dashboard",
@@ -47,6 +48,11 @@ const routes = [
       {
         path: "recipe/:id",
         element: <RecipeDetail />,
+      },
+      {
+        path: "create-recipe", // ✅ New Route for Creating Recipes
+        element: <CreateRecipe />,
+        loader: authLoader, // Ensuring only authenticated users can access
       },
     ],
     hydrateFallbackElement: <Loader />,
