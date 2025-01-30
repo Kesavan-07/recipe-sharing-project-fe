@@ -13,12 +13,17 @@ const authServices = {
   },
 
   login: async (data) => {
-    return instance
-      .post(`${BASE_URL}/login`, data)
-      .then((response) => response.data)
-      .catch((error) => {
-        throw error.response?.data || error.message;
-      });
+    try {
+      const response = await instance.post(`${BASE_URL}/login`, data);
+      console.log("Login Response:", response.data); // ✅ Debugging
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("❌ Login Error:", error);
+      throw error;
+    }
   },
 
   logout: async () => {
