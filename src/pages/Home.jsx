@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import recipeServices from "../services/recipeServices";
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // ✅ Navigation Hook
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -27,15 +25,12 @@ const Home = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Welcome to Recipe Sharing
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">All Recipes</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {recipes.map((recipe) => (
           <div
             key={recipe._id}
-            className="p-4 border rounded shadow-md bg-white cursor-pointer"
-            onClick={() => navigate(`/recipe/${recipe._id}`)} // ✅ Navigate to detail page
+            className="p-4 border rounded shadow-md bg-white"
           >
             <img
               src={recipe.image || "https://via.placeholder.com/150"}
@@ -43,11 +38,7 @@ const Home = () => {
               className="w-full h-40 object-cover rounded"
             />
             <h2 className="text-xl font-semibold mt-2">{recipe.title}</h2>
-            <p className="text-gray-600">
-              {recipe.description
-                ? recipe.description.substring(0, 100) + "..."
-                : "No description available."}
-            </p>
+            <p>By: {recipe.user?.username || "Unknown"}</p>
           </div>
         ))}
       </div>

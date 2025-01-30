@@ -4,7 +4,7 @@ const baseURL = "https://recipe-sharing-project-be.onrender.com";
 
 const instance = axios.create({
     baseURL,
-    timeout: 5000,
+    timeout: 10000  ,
     headers: {
         'Content-Type': 'application/json',
     },
