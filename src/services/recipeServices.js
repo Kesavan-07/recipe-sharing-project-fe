@@ -72,7 +72,31 @@ const recipeServices = {
     }
   },
 
-  // Add similar fixes for other methods (if needed)...
+  addRating: async (recipeId, rating) => {
+    try {
+      const token = localStorage.getItem("token");
+      return await instance.post(
+        `${API_BASE_URL}/rate`,
+        { recipeId, rating },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error("Error submitting rating:", error.response?.data || error);
+    }
+  },
+
+  addComment: async (recipeId, text) => {
+    try {
+      const token = localStorage.getItem("token");
+      return await instance.post(
+        `${API_BASE_URL}/comment`,
+        { recipeId, text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error("Error adding comment:", error.response?.data || error);
+    }
+  },
 };
 
 export default recipeServices;

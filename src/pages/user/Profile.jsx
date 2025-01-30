@@ -2,81 +2,53 @@ import React, { useState, useEffect } from "react";
 import authServices from "../../services/authServices";
 import axios from "axios";
 
-
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token"); // ✅ Ensure token is present
+        const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found. Please log in.");
 
         const response = await authServices.myProfile();
-
-        // ✅ Validate response structure without throwing unnecessary errors
         if (response && response._id && response.username) {
-          setUser(response); // ✅ Set valid user data
+          setUser(response);
+          setFollowers(response.followers || []);
+          setFollowing(response.following || []);
         } else {
           console.warn("Invalid profile data structure:", response);
-          setError("Failed to load profile."); 
+          setError("Failed to load profile.");
         }
       } catch (err) {
         console.error("Profile Fetch Error:", err.message || err);
         setError(err.message || "Failed to load profile.");
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchProfile();
   }, []);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) {
-      alert("No file selected.");
-      return;
-    }
-    setProfileImage(file);
-  };
-
-  const handleUpload = async () => {
-    if (!profileImage) {
-      alert("Please select an image first.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("profilePicture", profileImage);
-
+  const handleFollow = async (userId) => {
     try {
-      const response = await axios.post(
-        "https://recipe-sharing-project-be.onrender.com/api/v1/users/profile/upload", // Updated route
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      alert(response.data.message || "Profile picture updated successfully!");
-      window.location.reload(); // ✅ Refresh page to show updated profile image
+      await authServices.followUser(userId);
+      alert("Followed successfully!");
+      window.location.reload();
     } catch (err) {
-      console.error(
-        "Error uploading image:",
-        err.response?.data || err.message
-      );
-      alert(err.response?.data?.message || "Failed to upload profile picture.");
+      console.error("Error following user:", err.message || err);
+      alert("Failed to follow user.");
     }
   };
 
   if (loading) return <p>Loading profile...</p>;
-  if (error) return <p style={{ color: "red" }}>Error: {error}</p>; // ✅ Display specific error message
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
   return (
     <div className="container mx-auto p-6">
@@ -90,19 +62,40 @@ const Profile = () => {
             alt="Profile"
             className="w-32 h-32 rounded-full mx-auto"
           />
-
           <h2 className="text-xl font-semibold text-center mt-2">
             {user.username}
           </h2>
           <p className="text-gray-600 text-center">{user.email}</p>
           <div className="mt-4">
+            <h3 className="text-lg font-bold">Followers</h3>
+            <ul>
+              {followers.map((follower) => (
+                <li key={follower._id}>{follower.username}</li>
+              ))}
+            </ul>
+            <h3 className="text-lg font-bold mt-4">Following</h3>
+            <ul>
+              {following.map((followed) => (
+                <li key={followed._id}>{followed.username}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="mt-4">
             <input
               type="file"
-              accept="image/*" 
-              onChange={handleFileChange}
+              accept="image/*"
+              onChange={(e) => setProfileImage(e.target.files[0])}
             />
             <button
-              onClick={handleUpload}
+              onClick={async () => {
+                if (profileImage) {
+                  const formData = new FormData();
+                  formData.append("profilePicture", profileImage);
+                  await authServices.uploadProfilePicture(formData);
+                  alert("Profile updated successfully!");
+                  window.location.reload();
+                }
+              }}
               className="block w-full mt-2 bg-gray-900 text-white p-2 rounded"
             >
               Upload Profile Picture
