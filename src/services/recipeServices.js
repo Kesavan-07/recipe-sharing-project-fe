@@ -5,24 +5,24 @@ const API_BASE_URL =
   "https://recipe-sharing-project-be.onrender.com/api/v1/recipes";
 
 const recipeServices = {
-  getAllRecipes: async () => {
+  getMyRecipes: async () => {
     try {
-      const response = await instance.get(`${API_BASE_URL}/all`);
-      console.log("📌 Recipes API Response:", response.data);
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API_BASE_URL}/my-recipes`, {
+        // ✅ Fixed API URL
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      if (Array.isArray(response.data)) {
-        return response.data;
-      } else if (
-        response.data.recipes &&
-        Array.isArray(response.data.recipes)
-      ) {
-        return response.data.recipes;
-      } else {
-        throw new Error("Unexpected API response format.");
-      }
+      console.log("📌 Fetched User Recipes:", response.data); // ✅ Debugging
+      return response.data; // ✅ Return the array of recipes
     } catch (error) {
-      console.error("❌ Error fetching recipes:", error);
-      return [];
+      console.error(
+        "❌ Error fetching recipes:",
+        error.response?.data || error.message
+      );
+      return []; // ✅ Return an empty array on error
     }
   },
 
