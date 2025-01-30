@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import recipeServices from "../services/recipeServices";
+import Loader from "../components/Loader"; // Import Loader
 
 const RecipeDetail = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +28,7 @@ const RecipeDetail = () => {
     fetchRecipe();
   }, [id]);
 
-  if (loading) return <p>Loading recipe details...</p>;
+  if (loading) return <Loader />;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!recipe) return null;
 

@@ -10,29 +10,34 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <nav className="bg-white text-gray-800 p-4 flex justify-between items-center shadow-md px-12 z-10">
-        {/* Left Links */}
-        <div className="flex space-x-6">
-          <Link to="/" className="hover:text-gray-600 font-medium">
-            Home
+      <nav className="bg-white text-gray-800 p-4 flex items-center justify-between shadow-md px-12 z-10">
+        <div
+          className="flex items-center space-x-6"
+          style={{ marginTop: "0.5rem" }}
+        >
+          <Link
+            to="/"
+            className="akaya-kanadaka-regular text-2xl hover:text-gray-500"
+          >
+            Food Tech
           </Link>
           {user && (
             <>
               <Link
                 to="/user/dashboard"
-                className="hover:text-gray-600 font-medium"
+                className="hover:text-gray-600 font-medium akaya-kanadaka-regular leading-none flex items-center "
               >
                 Dashboard
               </Link>
               <Link
                 to="/user/profile"
-                className="hover:text-gray-600 font-medium"
+                className="hover:text-gray-600 font-medium akaya-kanadaka-regular leading-none flex items-center"
               >
                 Profile
               </Link>
               <Link
                 to="/user/recipes"
-                className="hover:text-gray-600 font-medium"
+                className="hover:text-gray-600 font-medium akaya-kanadaka-regular leading-none flex items-center"
               >
                 My Recipes
               </Link>
@@ -44,13 +49,16 @@ const Layout = ({ children }) => {
         <div>
           {!user && (
             <StyledLoginButton to="/login">
-              <span className="text">Login</span>
-              <span className="hover-text">Sign Up</span>
+              <span className="text akaya-kanadaka-regular">Login</span>
+              <span className="hover-text akaya-kanadaka-regular">
+                {" "}
+                boooo!!
+              </span>
             </StyledLoginButton>
           )}
           {user && (
             <button
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+              className="bg-red-400 text-white px-4 py-2 rounded-lg hover:bg-red-600 transitionakaya-kanadaka-regular leading-none flex items-center "
               onClick={() => navigate("/logout", { replace: true })}
             >
               Logout

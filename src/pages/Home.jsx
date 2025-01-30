@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom"; // For navigation
 import recipeServices from "../services/recipeServices";
+import Loader from "../components/Loader"; // Import Loader
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
@@ -27,21 +28,23 @@ const Home = () => {
     fetchAllRecipes();
   }, []);
 
-  if (loading) return <p>Loading recipes...</p>;
+  if (loading) return <Loader />;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 "> Recipes you'll love</h1>
+      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font ">
+        Recipes you'll love
+      </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {recipes.map((recipe) => (
           <Link
-            to={`/recipe/${recipe._id}`} // Navigate to the recipe details page
+            to={`/recipe/${recipe._id}`}
             key={recipe._id}
             className="block bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition duration-300"
           >
             <img
-              src={recipe.image || "https://via.placeholder.com/150"} // Placeholder image if none is provided
+              src={recipe.image || "https://via.placeholder.com/150"}
               alt={recipe.title}
               className="w-full h-40 object-cover rounded-t-lg"
             />

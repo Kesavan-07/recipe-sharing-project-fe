@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import authServices from "../../services/authServices";
 import axios from "axios";
 
+
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
@@ -21,13 +22,13 @@ const Profile = () => {
           setUser(response); // ✅ Set valid user data
         } else {
           console.warn("Invalid profile data structure:", response);
-          setError("Failed to load profile."); // ✅ Set meaningful error
+          setError("Failed to load profile."); 
         }
       } catch (err) {
         console.error("Profile Fetch Error:", err.message || err);
         setError(err.message || "Failed to load profile.");
       } finally {
-        setLoading(false); // ✅ Ensure loading stops
+        setLoading(false); 
       }
     };
 
@@ -40,7 +41,6 @@ const Profile = () => {
       alert("No file selected.");
       return;
     }
-    console.log("Selected file:", file); // ✅ Debugging
     setProfileImage(file);
   };
 
@@ -80,14 +80,17 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
+      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font">
+        Profile
+      </h1>
       {user && (
         <div className="max-w-md mx-auto p-4 border rounded shadow-lg bg-white">
           <img
-            src={user.profilePicture || "https://via.placeholder.com/150"} // ✅ Placeholder for empty profile picture
+            src={user.profilePicture || "/Images/ramsay.jpeg"}
             alt="Profile"
             className="w-32 h-32 rounded-full mx-auto"
           />
+
           <h2 className="text-xl font-semibold text-center mt-2">
             {user.username}
           </h2>
@@ -95,12 +98,12 @@ const Profile = () => {
           <div className="mt-4">
             <input
               type="file"
-              accept="image/*" // Restrict to images only
+              accept="image/*" 
               onChange={handleFileChange}
             />
             <button
               onClick={handleUpload}
-              className="block w-full mt-2 bg-gray-500 text-white p-2 rounded"
+              className="block w-full mt-2 bg-gray-900 text-white p-2 rounded"
             >
               Upload Profile Picture
             </button>

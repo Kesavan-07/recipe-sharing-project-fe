@@ -49,7 +49,9 @@ const RecipeDashboard = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Create a Recipe</h1>
+      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font">
+        Create a Recipe
+      </h1>
 
       {/* ✅ Success Notification */}
       {success && <SuccessNotification onClose={() => setSuccess(false)} />}
@@ -109,7 +111,7 @@ const RecipeDashboard = () => {
         {error && <p className="text-red-500">{error}</p>}
         <button
           type="submit"
-          className="w-full p-2 bg-gray-500 text-white rounded"
+          className="w-full p-2 bg-black text-white rounded"
           disabled={loading}
         >
           {loading ? "Creating..." : "Create Recipe"}

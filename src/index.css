@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+.lavishly-yours-title {
+  font-family: "Lavishly Yours", serif;
+  font-weight: 400;
+  font-style: normal;
+    font-size: 2.5rem;
+}
+.Playwrite-IN-font {
+  font-family: "Playwrite IN", serif;
+  font-optical-sizing: auto;
+  font-weight: 400; 
+  font-style: normal;
+}
+.akaya-kanadaka-regular {
+  font-family: "Akaya Kanadaka", serif;
+    font-optical-sizing: auto;
+  font-weight: 200;
+  font-style: normal;
+  font-size: 1.5rem;
+}
+
+
