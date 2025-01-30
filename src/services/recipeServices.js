@@ -1,4 +1,5 @@
 import instance from "./instance";
+import axios from "axios";
 
 const API_BASE_URL =
   "https://recipe-sharing-project-be.onrender.com/api/v1/recipes";
