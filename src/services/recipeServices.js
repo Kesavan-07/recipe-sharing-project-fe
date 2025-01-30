@@ -50,7 +50,26 @@ const recipeServices = {
   },
 
   getRecipeById: async (id) => instance.get(`${BASE_URL}/${id}`),
-  createRecipe: async (data) => instance.post(`${BASE_URL}/create`, data),
+  createRecipe: async (data) => {
+    try {
+      const token = localStorage.getItem("token"); // ✅ Get token from local storage
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
+
+      const response = await instance.post(`${BASE_URL}/create`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Attach token
+          "Content-Type": "application/json",
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error creating recipe:", error.response?.data || error);
+      throw error; // ✅ Ensure error is caught in frontend
+    }
+  },
   updateRecipe: async (id, data) => instance.put(`${BASE_URL}/${id}`, data),
   deleteRecipe: async (id) => instance.delete(`${BASE_URL}/${id}`),
 };

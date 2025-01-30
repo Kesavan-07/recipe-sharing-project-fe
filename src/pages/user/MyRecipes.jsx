@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import recipeServices from "../services/recipeServices";
+import recipeServices from "../../services/recipeServices";
 
 const MyRecipes = () => {
   const [recipes, setRecipes] = useState([]);

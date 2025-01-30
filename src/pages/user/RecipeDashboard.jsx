@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import recipeServices from "../../services/recipeServices";
 import { useNavigate } from "react-router-dom";
+import SuccessNotification from "../../components/SuccessNotification";
 
 const RecipeDashboard = () => {
   const [recipeData, setRecipeData] = useState({
@@ -11,7 +12,7 @@ const RecipeDashboard = () => {
     servings: "",
     image: "",
   });
-
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -27,11 +28,20 @@ const RecipeDashboard = () => {
 
     try {
       await recipeServices.createRecipe(recipeData);
-      alert("Recipe created successfully!");
-      navigate("/"); // Redirect to Home after creating
+      setSuccess(true); // ✅ Show success notification
+      setTimeout(() => setSuccess(false), 5000); // ✅ Hide after 5s
+      setRecipeData({
+        title: "",
+        ingredients: "",
+        instructions: "",
+        cookingTime: "",
+        servings: "",
+        image: "",
+      });
+      navigate("/"); // ✅ Redirect to Home after creating
     } catch (err) {
       setError("Failed to create recipe.");
-      console.error("Error creating recipe:", err);
+      console.error("❌ Error creating recipe:", err);
     } finally {
       setLoading(false);
     }
@@ -40,6 +50,10 @@ const RecipeDashboard = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">Create a Recipe</h1>
+
+      {/* ✅ Success Notification */}
+      {success && <SuccessNotification onClose={() => setSuccess(false)} />}
+
       <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
         <input
           type="text"
@@ -95,7 +109,7 @@ const RecipeDashboard = () => {
         {error && <p className="text-red-500">{error}</p>}
         <button
           type="submit"
-          className="w-full p-2 bg-blue-500 text-white rounded"
+          className="w-full p-2 bg-gray-500 text-white rounded"
           disabled={loading}
         >
           {loading ? "Creating..." : "Create Recipe"}
