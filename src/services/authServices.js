@@ -48,7 +48,23 @@ const authServices = {
       .catch((error) => {
         throw error.response?.data || error.message;
       });
-  },
+    },
+   getCurrentUser : async (token) => {
+  try {
+    const response = await axios.get(
+      "https://recipe-sharing-project-be.onrender.com/api/v1/auth/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Pass the token
+        },
+      }
+    );
+    return response.data.user;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    throw error.response ? error.response.data : { message: "Unknown error" };
+  }
+},
 };
 
 export default authServices;
