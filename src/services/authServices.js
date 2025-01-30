@@ -1,4 +1,5 @@
 import instance from "./instance";
+import axios from "axios";
 
 const BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1/auth";
 
@@ -36,35 +37,46 @@ const authServices = {
   },
 
   myProfile: async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No authentication token found.");
-    }
-    return instance
-      .get(`${BASE_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => response.data)
-      .catch((error) => {
-        throw error.response?.data || error.message;
-      });
-    },
-   getCurrentUser : async (token) => {
-  try {
-    const response = await axios.get(
-      "https://recipe-sharing-project-be.onrender.com/api/v1/auth/me",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // Pass the token
-        },
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.warn("No auth token found in localStorage");
+        return null;
       }
-    );
-    return response.data.user;
-  } catch (error) {
-    console.error("Error fetching current user:", error);
-    throw error.response ? error.response.data : { message: "Unknown error" };
-  }
-},
+
+      const response = await axios.get(`${API_BASE_URL}/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Profile API Response:", response.data); // Debugging
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error fetching user profile:",
+        error.response?.data || error.message
+      );
+      return null;
+    }
+  },
+  getCurrentUser: async (token) => {
+    try {
+      const response = await axios.get(
+        "https://recipe-sharing-project-be.onrender.com/api/v1/auth/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token
+          },
+        }
+      );
+      return response.data.user;
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      throw error.response ? error.response.data : { message: "Unknown error" };
+    }
+  },
 };
 
 export default authServices;
