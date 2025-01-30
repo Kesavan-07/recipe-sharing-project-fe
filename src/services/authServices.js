@@ -1,12 +1,12 @@
 import instance from "./instance";
 import axios from "axios";
 
-const BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1/auth";
+const API_BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1/auth"; // ✅ Ensure this is defined
 
 const authServices = {
   register: async (data) => {
     return instance
-      .post(`${BASE_URL}/register`, data)
+      .post(`${API_BASE_URL}/register`, data)
       .then((response) => response.data)
       .catch((error) => {
         throw error.response?.data || error.message;
@@ -15,7 +15,7 @@ const authServices = {
 
   login: async (data) => {
     try {
-      const response = await instance.post(`${BASE_URL}/login`, data);
+      const response = await instance.post(`${API_BASE_URL}/login`, data);
       console.log("Login Response:", response.data); // ✅ Debugging
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
@@ -29,7 +29,7 @@ const authServices = {
 
   logout: async () => {
     return instance
-      .post(`${BASE_URL}/logout`)
+      .post(`${API_BASE_URL}/logout`)
       .then((response) => response.data)
       .catch((error) => {
         throw error.response?.data || error.message;

@@ -3,17 +3,17 @@ import authServices from "../../services/authServices";
 const authLoader = async () => {
   try {
     const userData = await authServices.myProfile();
-    console.log("AuthLoader Response:", userData); // Debugging
+    console.log("AuthLoader Response:", userData); // ✅ Debugging
 
     if (!userData) {
       console.warn("No user data received from API");
-      return null;
+      throw new Error("User data is null or undefined"); // ✅ Ensure the error is handled properly
     }
 
     // Validate required fields
     if (!userData._id || !userData.username) {
       console.warn("Invalid user data structure:", userData);
-      return null;
+      throw new Error("Invalid user data format"); // ✅ Force error if structure is incorrect
     }
 
     // Assign default role if missing
@@ -22,10 +22,10 @@ const authLoader = async () => {
       userData.role = "guest";
     }
 
-    return userData;
+    return userData; // ✅ Return valid user data
   } catch (error) {
     console.error("AuthLoader Error:", error.message || "Unknown error");
-    return null;
+    return null; // ✅ Ensure failure is handled properly
   }
 };
 

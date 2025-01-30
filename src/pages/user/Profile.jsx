@@ -11,12 +11,23 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await authServices.getProfile();
-        setUser(response.data);
+        const token = localStorage.getItem("token"); // ✅ Ensure token is present
+        if (!token) throw new Error("No token found. Please log in.");
+
+        const response = await authServices.myProfile();
+
+        // ✅ Validate response structure without throwing unnecessary errors
+        if (response && response._id && response.username) {
+          setUser(response); // ✅ Set valid user data
+        } else {
+          console.warn("Invalid profile data structure:", response);
+          setError("Failed to load profile."); // ✅ Set meaningful error
+        }
       } catch (err) {
-        setError("Failed to load profile.");
+        console.error("Profile Fetch Error:", err.message || err);
+        setError(err.message || "Failed to load profile.");
       } finally {
-        setLoading(false);
+        setLoading(false); // ✅ Ensure loading stops
       }
     };
 
@@ -24,7 +35,13 @@ const Profile = () => {
   }, []);
 
   const handleFileChange = (e) => {
-    setProfileImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (!file) {
+      alert("No file selected.");
+      return;
+    }
+    console.log("Selected file:", file); // ✅ Debugging
+    setProfileImage(file);
   };
 
   const handleUpload = async () => {
@@ -37,8 +54,8 @@ const Profile = () => {
     formData.append("profilePicture", profileImage);
 
     try {
-      await axios.post(
-        "https://recipe-sharing-project-be.onrender.com/api/v1/user/profile/upload",
+      const response = await axios.post(
+        "https://recipe-sharing-project-be.onrender.com/api/v1/users/profile/upload", // Updated route
         formData,
         {
           headers: {
@@ -47,16 +64,19 @@ const Profile = () => {
           },
         }
       );
-      alert("Profile picture updated successfully!");
-      window.location.reload(); // Refresh page to show updated profile image
+      alert(response.data.message || "Profile picture updated successfully!");
+      window.location.reload(); // ✅ Refresh page to show updated profile image
     } catch (err) {
-      console.error("Error uploading image:", err);
-      alert("Failed to upload profile picture.");
+      console.error(
+        "Error uploading image:",
+        err.response?.data || err.message
+      );
+      alert(err.response?.data?.message || "Failed to upload profile picture.");
     }
   };
 
   if (loading) return <p>Loading profile...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>; // ✅ Display specific error message
 
   return (
     <div className="container mx-auto p-6">
@@ -64,7 +84,7 @@ const Profile = () => {
       {user && (
         <div className="max-w-md mx-auto p-4 border rounded shadow-lg bg-white">
           <img
-            src={user.profilePicture || "https://via.placeholder.com/150"}
+            src={user.profilePicture || "https://via.placeholder.com/150"} // ✅ Placeholder for empty profile picture
             alt="Profile"
             className="w-32 h-32 rounded-full mx-auto"
           />
@@ -73,7 +93,11 @@ const Profile = () => {
           </h2>
           <p className="text-gray-600 text-center">{user.email}</p>
           <div className="mt-4">
-            <input type="file" onChange={handleFileChange} />
+            <input
+              type="file"
+              accept="image/*" // Restrict to images only
+              onChange={handleFileChange}
+            />
             <button
               onClick={handleUpload}
               className="block w-full mt-2 bg-gray-500 text-white p-2 rounded"
