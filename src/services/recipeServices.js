@@ -7,15 +7,12 @@ const recipeServices = {
   createRecipe: async (data) => {
     try {
       let formData = new FormData(); // Ensure formData is declared only once
-
-      // Append text fields
       formData.append("title", data.title);
       formData.append("ingredients", data.ingredients);
       formData.append("instructions", data.instructions);
       formData.append("cookingTime", data.cookingTime);
       formData.append("servings", data.servings);
 
-      // Append image file (Only if an image is selected)
       if (data.image instanceof File) {
         formData.append("image", data.image);
       }
@@ -46,7 +43,22 @@ const recipeServices = {
       return [];
     }
   },
+  getMyRecipes: async (token) => {
+    try {
+          const response = await axios.get(`${API_BASE_URL}/my-recipes`);
 
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const data = await response.json(); // Attempt to parse the response as JSON
+    return data;
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    throw error;
+    }
+    },
   getRecipeById: async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -89,8 +101,8 @@ const recipeServices = {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${API_BASE_URL}/comment`,
-        { recipeId, text },
+        `${API_BASE_URL}/${recipeId}/comments`,
+        { text },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -101,6 +113,29 @@ const recipeServices = {
         "Error adding comment:",
         error.response?.data || error.message
       );
+      throw error;
+    }
+  },
+
+  rateRecipe: async (recipeId, userId, rating) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${recipeId}/rate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, rating }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error("Failed to submit rating");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error rating recipe:", error);
       throw error;
     }
   },

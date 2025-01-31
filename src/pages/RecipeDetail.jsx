@@ -8,8 +8,9 @@ const RecipeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState(false);
-  const [newComment, setNewComment] = useState(""); 
-  const [showComments, setShowComments] = useState(false); 
+  const [newComment, setNewComment] = useState("");
+  const [showComments, setShowComments] = useState(false);
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -30,16 +31,15 @@ const RecipeDetail = () => {
 
   const handleLike = async () => {
     try {
-        const userId = localStorage.getItem("userId");
-      console.log("User ID:", userId);
+      const userId = localStorage.getItem("userId");
       if (!userId) {
         alert("Please log in to like the recipe.");
         return;
       }
 
       const updatedRecipe = await recipeServices.likeRecipe(id, userId);
-      setLiked(!liked); // Toggle the like state
-      setRecipe(updatedRecipe); // Update the recipe with the new like count
+      setLiked(!liked);
+      setRecipe(updatedRecipe);
     } catch (error) {
       console.error("Error liking recipe:", error.message || error);
     }
@@ -60,25 +60,31 @@ const RecipeDetail = () => {
 
       const commentData = { userId, text: newComment };
       const updatedRecipe = await recipeServices.addComment(id, commentData);
-
-      setRecipe(updatedRecipe); // Update recipe with new comments
-      setNewComment(""); // Clear the input field
+      setRecipe(updatedRecipe);
+      setNewComment("");
     } catch (error) {
       console.error("Error adding comment:", error.message || error);
-      alert("Failed to add comment. Please try again.");
     }
   };
 
-  const handleShare = () => {
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => {
-        alert("Recipe link copied to clipboard!");
-      })
-      .catch((error) => {
-        console.error("Failed to copy link:", error.message || error);
-        alert("Failed to copy link. Please try manually.");
-      });
+  const handleRating = async (newRating) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("Please log in to rate the recipe.");
+        return;
+      }
+
+      const updatedRecipe = await recipeServices.rateRecipe(
+        id,
+        userId,
+        newRating
+      );
+      setRecipe(updatedRecipe);
+      setRating(newRating);
+    } catch (error) {
+      console.error("Error rating recipe:", error.message || error);
+    }
   };
 
   if (loading) return <p>Loading...</p>;
@@ -94,9 +100,7 @@ const RecipeDetail = () => {
         className="w-full h-64 object-cover rounded-lg mb-4"
       />
 
-      {/* Instagram-like Like, Comment, and Share Section */}
       <div className="flex items-center justify-between max-w-md mx-auto py-4">
-        {/* Like Button */}
         <div className="flex items-center cursor-pointer" onClick={handleLike}>
           <img
             src={liked ? "/Images/like.png" : "/Images/liked.png"}
@@ -106,10 +110,9 @@ const RecipeDetail = () => {
           <span>{liked ? "Liked" : "Like"}</span>
         </div>
 
-        {/* Comment Button */}
         <div
           className="flex items-center cursor-pointer"
-          onClick={() => setShowComments(!showComments)} // Toggle comments
+          onClick={() => setShowComments(!showComments)}
         >
           <img
             src="/Images/comment.png"
@@ -118,21 +121,8 @@ const RecipeDetail = () => {
           />
           <span>Comment</span>
         </div>
-
-        {/* Share Button */}
-        <div className="flex items-center cursor-pointer" onClick={handleShare}>
-          <img src="/public/share.png" alt="Share" className="w-6 h-6 mr-2" />
-          <span>Share</span>
-        </div>
       </div>
 
-      {/* Likes and Comments Count */}
-      <div className="max-w-md mx-auto py-2">
-        <p className="font-bold">{recipe.likes?.length || 0} likes</p>
-        <p className="text-gray-600">{recipe.comments?.length || 0} comments</p>
-      </div>
-
-      {/* Conditional Rendering for Comment Section */}
       {showComments && (
         <div className="max-w-md mx-auto py-4">
           <input
@@ -143,7 +133,7 @@ const RecipeDetail = () => {
             className="border p-2 w-full rounded"
           />
           <button
-            onClick={handleComment} // Call the comment handler
+            onClick={handleComment}
             className="bg-gray-800 text-white px-4 py-2 rounded mt-2"
           >
             Post
@@ -151,7 +141,6 @@ const RecipeDetail = () => {
         </div>
       )}
 
-      {/* Recipe Details */}
       <div className="max-w-md mx-auto">
         <h2 className="text-xl font-bold mb-2">Ingredients:</h2>
         <ul className="list-disc list-inside mb-4">
@@ -162,6 +151,27 @@ const RecipeDetail = () => {
 
         <h2 className="text-xl font-bold mb-2">Instructions:</h2>
         <p>{recipe.instructions}</p>
+      </div>
+
+      {/* Ratings Section */}
+      <div className="max-w-md mx-auto mt-6">
+        <h2 className="text-xl font-bold mb-2">Rate this Recipe:</h2>
+        <div className="flex space-x-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span
+              key={star}
+              className={`cursor-pointer text-2xl ${
+                rating >= star ? "text-yellow-500" : "text-gray-400"
+              }`}
+              onClick={() => handleRating(star)}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+        <p className="mt-2">
+          Average Rating: {recipe.averageRating || "No ratings yet"}
+        </p>
       </div>
     </div>
   );

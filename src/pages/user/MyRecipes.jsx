@@ -10,7 +10,8 @@ const MyRecipes = () => {
   useEffect(() => {
     const fetchMyRecipes = async () => {
       try {
-        const response = await recipeServices.getMyRecipes();
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const response = await recipeServices.getMyRecipes(token);
         console.log("Fetched My Recipes:", response);
         if (!response || response.length === 0) {
           setError("No recipes found.");

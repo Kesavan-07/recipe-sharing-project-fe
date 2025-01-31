@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import authServices from "../../services/authServices";
 import { updateProfile } from "../../redux/features/auth/userSlice";
-import Button from "../../components/Button";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -61,7 +60,6 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Updated to use Redux `updateProfile` action
   const handleUpdate = async () => {
     try {
       await dispatch(updateProfile(formData)).unwrap();
@@ -98,9 +96,19 @@ const Profile = () => {
               <p className="text-gray-600 text-center">
                 {user.bio || "No bio available"}
               </p>
-              <Button className="mt-3" onClick={() => setEditMode(true)}>
+              <button
+                className="mt-3 bg-gray-900 text-white py-2 px-4 rounded cursor-pointer"
+                onClick={() => {
+                  setEditMode(true);
+                  setFormData({
+                    name: user.username || "add your name here",
+                    email: user.email || "add your email here",
+                    bio: user.bio || "add you Bio here",
+                  }); // Prefill the form with existing data
+                }}
+              >
                 Edit Profile
-              </Button>
+              </button>
             </>
           ) : (
             <>
@@ -122,11 +130,15 @@ const Profile = () => {
                 value={formData.bio}
                 onChange={handleChange}
               ></textarea>
-              <Button className="mt-3" onClick={handleUpdate}>
+              <button
+                className="mt-3 bg-gray-900 text-white py-2 px-4 rounded cursor-pointer"
+                onClick={handleUpdate}
+              >
                 Save
-              </Button>
+              </button>
             </>
           )}
+
           <div className="mt-4">
             <h3 className="text-lg font-bold">Followers</h3>
             <ul>
@@ -142,13 +154,21 @@ const Profile = () => {
             </ul>
           </div>
           <div className="mt-4">
+            <label
+              htmlFor="file-upload"
+              className="bg-gray-900 text-white py-2 px-4 rounded cursor-pointer block text-center"
+            >
+              Choose File
+            </label>
             <input
+              id="file-upload"
               type="file"
               accept="image/*"
+              className="hidden"
               onChange={(e) => setProfileImage(e.target.files[0])}
             />
-            <Button
-              className="block w-full mt-2 bg-gray-900 text-white p-2 rounded"
+            <button
+              className="block w-full mt-2 bg-gray-900 text-white py-2 px-4 rounded cursor-pointer"
               onClick={async () => {
                 if (profileImage) {
                   const formData = new FormData();
@@ -160,7 +180,7 @@ const Profile = () => {
               }}
             >
               Upload Profile Picture
-            </Button>
+            </button>
           </div>
         </div>
       )}
