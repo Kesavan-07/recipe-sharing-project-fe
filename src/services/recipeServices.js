@@ -47,6 +47,16 @@ const recipeServices = {
   },
 
   createRecipe: async (formData) => {
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("ingredients", data.ingredients);
+    formData.append("instructions", data.instructions);
+    formData.append("cookingTime", data.cookingTime);
+    formData.append("servings", data.servings);
+    if (data.image) {
+      formData.append("image", data.image); // Append the image file
+    }
+
     try {
       const response = await axios.post(`${API_BASE_URL}/create`, formData, {
         headers: {
@@ -56,11 +66,13 @@ const recipeServices = {
       });
       return response.data;
     } catch (error) {
-      console.error("Error creating recipe:", error.response || error.message);
+      console.error(
+        "Error creating recipe:",
+        error.response?.data || error.message
+      );
       throw error;
     }
   },
-
   addRating: async (recipeId, rating) => {
     try {
       const token = localStorage.getItem("token");

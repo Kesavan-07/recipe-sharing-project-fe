@@ -20,10 +20,10 @@ const RecipeDashboard = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setRecipeData((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value, // Handle file uploads
-    }));
+  setRecipeData({
+    ...recipeData,
+    [name]: name === "image" ? files[0] : value, // Handle file uploads
+    });
   };
 
   const handleSubmit = async (e) => {
