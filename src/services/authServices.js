@@ -3,6 +3,16 @@ import axios from "axios";
 
 const API_BASE_URL = "https://recipe-sharing-project-be.onrender.com/api/v1/auth"; // ✅ Ensure this is defined
 
+const setAuthToken = (token) => {
+  if (token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    localStorage.setItem("token", token); // Store token
+  } else {
+    delete axios.defaults.headers.common["Authorization"];
+    localStorage.removeItem("token"); // Clear token on logout
+  }
+};
+
 const authServices = {
   register: async (data) => {
     return instance
@@ -16,9 +26,8 @@ const authServices = {
   login: async (data) => {
     try {
       const response = await instance.post(`${API_BASE_URL}/login`, data);
-      console.log("Login Response:", response.data); // ✅ Debugging
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+        setAuthToken(response.data.token); // ✅ Set token correctly
       }
       return response.data;
     } catch (error) {
@@ -28,6 +37,7 @@ const authServices = {
   },
 
   logout: async () => {
+    setAuthToken(null); // ✅ Clear token on logout
     return instance
       .post(`${API_BASE_URL}/logout`)
       .then((response) => response.data)
@@ -45,12 +55,8 @@ const authServices = {
       }
 
       const response = await axios.get(`${API_BASE_URL}/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("Profile API Response:", response.data); // Debugging
 
       return response.data;
     } catch (error) {

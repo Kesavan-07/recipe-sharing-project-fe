@@ -12,15 +12,19 @@ const RecipeDetail = () => {
   const [showComments, setShowComments] = useState(false);
   const [rating, setRating] = useState(0);
 
+  // Fetch recipe details on component mount
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         const response = await recipeServices.getRecipeById(id);
         setRecipe(response);
+
+        // Check if the current user has already liked the recipe
         const currentUserId = localStorage.getItem("userId");
         setLiked(response.likes?.includes(currentUserId) || false);
+        setRating(response.userRating || 0); // Preload user's rating if available
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching recipe:", err);
         setError("Failed to load recipe details.");
       } finally {
         setLoading(false);
@@ -29,6 +33,28 @@ const RecipeDetail = () => {
     fetchRecipe();
   }, [id]);
 
+  // Handle sharing the recipe
+  const handleShare = async () => {
+    const recipeUrl = `${window.location.origin}/recipe/${id}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: recipe.title,
+          text: `Check out this recipe: ${recipe.title}!`,
+          url: recipeUrl,
+        });
+        console.log("Recipe shared successfully!");
+      } catch (err) {
+        console.error("Error sharing recipe:", err);
+      }
+    } else {
+      navigator.clipboard.writeText(recipeUrl).then(() => {
+        alert("Recipe link copied to clipboard!");
+      });
+    }
+  };
+
+  // Handle liking the recipe
   const handleLike = async () => {
     try {
       const userId = localStorage.getItem("userId");
@@ -38,35 +64,19 @@ const RecipeDetail = () => {
       }
 
       const updatedRecipe = await recipeServices.likeRecipe(id, userId);
-      setLiked(!liked);
-      setRecipe(updatedRecipe);
+
+      if (updatedRecipe) {
+        setLiked(!liked);
+        setRecipe(updatedRecipe);
+      } else {
+        alert("Failed to update like status.");
+      }
     } catch (error) {
       console.error("Error liking recipe:", error.message || error);
     }
   };
 
-  const handleComment = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("Please log in to comment.");
-        return;
-      }
-
-      if (!newComment.trim()) {
-        alert("Comment cannot be empty.");
-        return;
-      }
-
-      const commentData = { userId, text: newComment };
-      const updatedRecipe = await recipeServices.addComment(id, commentData);
-      setRecipe(updatedRecipe);
-      setNewComment("");
-    } catch (error) {
-      console.error("Error adding comment:", error.message || error);
-    }
-  };
-
+  // Handle rating the recipe
   const handleRating = async (newRating) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -80,8 +90,13 @@ const RecipeDetail = () => {
         userId,
         newRating
       );
-      setRecipe(updatedRecipe);
-      setRating(newRating);
+
+      if (updatedRecipe) {
+        setRating(newRating);
+        setRecipe(updatedRecipe);
+      } else {
+        alert("Failed to update rating.");
+      }
     } catch (error) {
       console.error("Error rating recipe:", error.message || error);
     }
@@ -100,29 +115,43 @@ const RecipeDetail = () => {
         className="w-full h-64 object-cover rounded-lg mb-4"
       />
 
-      <div className="flex items-center justify-between max-w-md mx-auto py-4">
-        <div className="flex items-center cursor-pointer" onClick={handleLike}>
+      {/* Like, Comment, and Share Buttons */}
+      <div className="flex justify-around items-center py-4 border-t border-gray-200">
+        {/* Like Button */}
+        <button className="flex items-center gap-2" onClick={handleLike}>
           <img
-            src={liked ? "/Images/like.png" : "/Images/liked.png"}
+            src="/Images/like.png" // Ensure this PNG file exists in your public directory
             alt="Like"
-            className="w-6 h-6 mr-2"
+            className="w-6 h-6"
           />
-          <span>{liked ? "Liked" : "Like"}</span>
-        </div>
+          <span>{liked ? "Unlike" : "Like"}</span>
+        </button>
 
-        <div
-          className="flex items-center cursor-pointer"
+        {/* Comment Button */}
+        <button
+          className="flex items-center gap-2"
           onClick={() => setShowComments(!showComments)}
         >
           <img
-            src="/Images/comment.png"
+            src="/Images/comment.png" 
             alt="Comment"
-            className="w-6 h-6 mr-2"
+            className="w-6 h-6"
           />
           <span>Comment</span>
-        </div>
+        </button>
+
+        {/* Share Button */}
+        <button className="flex items-center gap-2" onClick={handleShare}>
+          <img
+            src="/public/share.png" 
+            alt="Share"
+            className="w-6 h-6"
+          />
+          <span>Share</span>
+        </button>
       </div>
 
+      {/* Comments Section */}
       {showComments && (
         <div className="max-w-md mx-auto py-4">
           <input

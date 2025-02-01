@@ -12,7 +12,8 @@ const RecipeForm = () => {
     cookingTime: "",
     servings: "",
     image: null,
-    video: "",
+    videoFile: null, // New: For video file upload
+    videoURL: "", // New: For YouTube link
   });
 
   const handleChange = (e) => {
@@ -23,10 +24,13 @@ const RecipeForm = () => {
     setRecipeData({ ...recipeData, image: e.target.files[0] });
   };
 
-  const handleSubmit = async (e) => {
-      e.preventDefault();
-        console.log("Submit triggered");
+  const handleVideoFileChange = (e) => {
+    setRecipeData({ ...recipeData, videoFile: e.target.files[0] });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Submit triggered");
 
     if (!recipeData.title || !recipeData.ingredients || !recipeData.steps) {
       toast.error("Please fill in all required fields.");
@@ -39,8 +43,14 @@ const RecipeForm = () => {
     formData.append("steps", recipeData.steps);
     formData.append("cookingTime", recipeData.cookingTime);
     formData.append("servings", recipeData.servings);
-    formData.append("image", recipeData.image);
-    formData.append("video", recipeData.video);
+    if (recipeData.image) {
+      formData.append("image", recipeData.image);
+    }
+    if (recipeData.videoFile) {
+      formData.append("video", recipeData.videoFile);
+    } else if (recipeData.videoURL) {
+      formData.append("video", recipeData.videoURL);
+    }
 
     try {
       await recipeServices.createRecipe(formData);
@@ -97,6 +107,9 @@ const RecipeForm = () => {
           onChange={handleChange}
           className="w-full p-2 border rounded mb-2"
         />
+
+        {/* Image Upload */}
+        <label className="block font-medium">Upload Recipe Image:</label>
         <input
           type="file"
           name="image"
@@ -104,14 +117,27 @@ const RecipeForm = () => {
           onChange={handleFileChange}
           className="w-full p-2 border rounded mb-2"
         />
+
+        {/* Video Upload OR YouTube Link */}
+        <label className="block font-medium">Upload Video (Optional):</label>
+        <input
+          type="file"
+          name="videoFile"
+          accept="video/*"
+          onChange={handleVideoFileChange}
+          className="w-full p-2 border rounded mb-2"
+        />
+
+        <label className="block font-medium">Or Enter YouTube Video URL:</label>
         <input
           type="text"
-          name="video"
-          placeholder="YouTube Video URL (Optional)"
-          value={recipeData.video}
+          name="videoURL"
+          placeholder="YouTube Video URL"
+          value={recipeData.videoURL}
           onChange={handleChange}
           className="w-full p-2 border rounded mb-2"
         />
+
         <button
           type="submit"
           className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
