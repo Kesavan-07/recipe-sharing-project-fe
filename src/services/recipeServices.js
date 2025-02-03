@@ -45,7 +45,6 @@ const recipeServices = {
       const response = await axios.get(`${API_BASE_URL}/my-recipes`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       console.error(
@@ -75,6 +74,20 @@ const recipeServices = {
     } catch (error) {
       console.error(
         "Error fetching recipe by ID:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  },
+
+  deleteRecipe: async (recipeId) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/${recipeId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+    } catch (error) {
+      console.error(
+        "Error deleting recipe:",
         error.response?.data || error.message
       );
       throw error;
