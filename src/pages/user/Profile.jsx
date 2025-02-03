@@ -31,11 +31,9 @@ const Profile = () => {
             bio: response.bio || "",
           });
         } else {
-          console.warn("Invalid profile data structure:", response);
           setError("Failed to load profile.");
         }
       } catch (err) {
-        console.error("Profile Fetch Error:", err.message || err);
         setError(err.message || "Failed to load profile.");
       } finally {
         setLoading(false);
@@ -44,17 +42,6 @@ const Profile = () => {
 
     fetchProfile();
   }, []);
-
-  const handleFollow = async (userId) => {
-    try {
-      await authServices.followUser(userId);
-      alert("Followed successfully!");
-      window.location.reload();
-    } catch (err) {
-      console.error("Error following user:", err.message || err);
-      alert("Failed to follow user.");
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -67,8 +54,20 @@ const Profile = () => {
       setEditMode(false);
       window.location.reload();
     } catch (err) {
-      console.error("Profile update failed:", err);
       alert("Failed to update profile.");
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!profileImage) return alert("Please select an image first!");
+    const formData = new FormData();
+    formData.append("profilePicture", profileImage);
+    try {
+      await authServices.uploadProfilePicture(formData);
+      alert("Profile picture updated successfully!");
+      window.location.reload();
+    } catch (error) {
+      alert("Error uploading profile picture.");
     }
   };
 
@@ -77,13 +76,11 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font">
-        Profile
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Profile</h1>
       {user && (
         <div className="max-w-md mx-auto p-4 border rounded shadow-lg bg-white">
           <img
-            src={user.profilePicture || "/Images/ramsay.jpeg"}
+            src={user.profilePicture || "/Images/default-profile.jpg"}
             alt="Profile"
             className="w-32 h-32 rounded-full mx-auto"
           />
@@ -97,15 +94,8 @@ const Profile = () => {
                 {user.bio || "No bio available"}
               </p>
               <button
-                className="mt-3 bg-gray-900 text-white py-2 px-4 rounded cursor-pointer"
-                onClick={() => {
-                  setEditMode(true);
-                  setFormData({
-                    name: user.username || "add your name here",
-                    email: user.email || "add your email here",
-                    bio: user.bio || "add you Bio here",
-                  }); // Prefill the form with existing data
-                }}
+                className="mt-3 bg-gray-900 text-white py-2 px-4 rounded"
+                onClick={() => setEditMode(true)}
               >
                 Edit Profile
               </button>
@@ -131,7 +121,7 @@ const Profile = () => {
                 onChange={handleChange}
               ></textarea>
               <button
-                className="mt-3 bg-gray-900 text-white py-2 px-4 rounded cursor-pointer"
+                className="mt-3 bg-gray-900 text-white py-2 px-4 rounded"
                 onClick={handleUpdate}
               >
                 Save
@@ -153,31 +143,18 @@ const Profile = () => {
               ))}
             </ul>
           </div>
+
           <div className="mt-4">
-            <label
-              htmlFor="file-upload"
-              className="bg-gray-900 text-white py-2 px-4 rounded cursor-pointer block text-center"
-            >
-              Choose File
-            </label>
             <input
               id="file-upload"
               type="file"
               accept="image/*"
-              className="hidden"
+              className="border p-2 w-full"
               onChange={(e) => setProfileImage(e.target.files[0])}
             />
             <button
-              className="block w-full mt-2 bg-gray-900 text-white py-2 px-4 rounded cursor-pointer"
-              onClick={async () => {
-                if (profileImage) {
-                  const formData = new FormData();
-                  formData.append("profilePicture", profileImage);
-                  await authServices.uploadProfilePicture(formData);
-                  alert("Profile updated successfully!");
-                  window.location.reload();
-                }
-              }}
+              className="mt-2 bg-gray-900 text-white py-2 px-4 rounded"
+              onClick={handleUpload}
             >
               Upload Profile Picture
             </button>
