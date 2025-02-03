@@ -1,5 +1,5 @@
-import React from "react";
 import styled from "styled-components";
+import PropTypes from "prop-types"; 
 
 const SuccessNotification = ({ onClose }) => {
   return (
@@ -50,6 +50,11 @@ const SuccessNotification = ({ onClose }) => {
       </div>
     </StyledWrapper>
   );
+};
+
+// ✅ Add PropTypes validation
+SuccessNotification.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 const StyledWrapper = styled.div`

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import PropTypes from "prop-types"; 
 import recipeServices from "../services/recipeServices";
 
 const RatingComponent = ({ recipeId }) => {
@@ -25,6 +26,11 @@ const RatingComponent = ({ recipeId }) => {
       ))}
     </div>
   );
+};
+
+// Prop validation
+RatingComponent.propTypes = {
+  recipeId: PropTypes.string.isRequired, // Ensure recipeId is a required string
 };
 
 export default RatingComponent;

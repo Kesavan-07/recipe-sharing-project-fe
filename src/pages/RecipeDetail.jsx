@@ -12,17 +12,15 @@ const RecipeDetail = () => {
   const [showComments, setShowComments] = useState(false);
   const [rating, setRating] = useState(0);
 
-  // Fetch recipe details on component mount
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         const response = await recipeServices.getRecipeById(id);
         setRecipe(response);
 
-        // Check if the current user has already liked the recipe
         const currentUserId = localStorage.getItem("userId");
-        setLiked(response.likes?.includes(currentUserId) || false);
-        setRating(response.userRating || 0); // Preload user's rating if available
+        setLiked(response.likes?.includes(currentUserId) || false); 
+        setRating(response.userRating || 0); 
       } catch (err) {
         console.error("Error fetching recipe:", err);
         setError("Failed to load recipe details.");
@@ -102,7 +100,32 @@ const RecipeDetail = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  // Handle posting a comment
+  const handleComment = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("Please log in to comment on the recipe.");
+        return;
+      }
+
+      const updatedRecipe = await recipeServices.addComment(id, {
+        userId,
+        text: newComment,
+      });
+
+      if (updatedRecipe) {
+        setRecipe(updatedRecipe);
+        setNewComment(""); // Clear the input after posting
+      } else {
+        alert("Failed to post comment.");
+      }
+    } catch (error) {
+      console.error("Error posting comment:", error.message || error);
+    }
+  };
+
+  if (loading) return <p >Loading...</p>;
   if (error) return <p>{error}</p>;
   if (!recipe) return null;
 

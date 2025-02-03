@@ -2,10 +2,11 @@ import recipeServices from "../../services/recipeServices";
 
 const recipeLoader = async ({ params }) => {
   try {
-    const response = await recipeServices.getRecipeById(params.id); 
+    const response = await recipeServices.getRecipeById(params.id);
     return response.data;
-  } catch (error) {
-    return {}; 
+  } catch {
+    console.error("Failed to load recipe:", params.id);
+    return {};
   }
 };
 

@@ -53,7 +53,7 @@ const Profile = () => {
       alert("Profile updated successfully!");
       setEditMode(false);
       window.location.reload();
-    } catch (err) {
+    } catch  {
       alert("Failed to update profile.");
     }
   };
@@ -66,7 +66,7 @@ const Profile = () => {
       await authServices.uploadProfilePicture(formData);
       alert("Profile picture updated successfully!");
       window.location.reload();
-    } catch (error) {
+    } catch  {
       alert("Error uploading profile picture.");
     }
   };

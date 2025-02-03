@@ -40,7 +40,7 @@ const Home = () => {
         {recipes.map((recipe) => (
           <Link
             to={`/recipe/${recipe._id}`}
-            key={recipe._id}
+            key={recipe._id} // Ensure _id is unique
             className="block bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition duration-300"
           >
             <img

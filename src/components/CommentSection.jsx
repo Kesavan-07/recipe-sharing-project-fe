@@ -1,30 +1,32 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import PropTypes from "prop-types"; 
 import recipeServices from "../services/recipeServices";
 
-const CommentSection = ({ recipeId, comments = [] }) => {
+const CommentSection = ({ recipeId, comments = [], setComments }) => {
   const [newComment, setNewComment] = useState("");
   const [allComments, setAllComments] = useState(comments || []);
 
-    const handleAddComment = async () => {
-   try {
-     const userId = localStorage.getItem("userId");
-     const comment = { userId, text: newComment }; // Assuming `newComment` is the input value
-     const updatedRecipe = await recipeServices.addComment(recipeId, comment);
+  const handleAddComment = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const comment = { userId, text: newComment }; // Assuming `newComment` is the input value
+      const updatedRecipe = await recipeServices.addComment(recipeId, comment);
 
-     setComments(updatedRecipe.comments); // Update state with new comments
-     setNewComment(""); // Clear the input field
-   } catch (error) {
-     console.error("Error adding comment:", error.message || error);
-     alert("Failed to add comment. Please try again.");
-   }
- };
+      // Update state with new comments
+      setComments(updatedRecipe.comments);
+      setNewComment(""); // Clear the input field
+    } catch (error) {
+      console.error("Error adding comment:", error.message || error);
+      alert("Failed to add comment. Please try again.");
+    }
+  };
 
   return (
     <div className="mt-6">
       <h2 className="text-xl font-bold mb-2">Comments</h2>
 
       {/* ✅ Check if there are any comments before mapping */}
-      {allComments.length > 0 ? (
+      {setAllComments.length > 0 ? (
         <ul className="list-disc pl-5">
           {allComments.map((comment, index) => (
             <li key={index} className="text-gray-700">
@@ -54,6 +56,13 @@ const CommentSection = ({ recipeId, comments = [] }) => {
       </div>
     </div>
   );
+};
+
+// Prop validation
+CommentSection.propTypes = {
+  recipeId: PropTypes.string.isRequired,
+  comments: PropTypes.array,
+  setComments: PropTypes.func.isRequired, // Ensure setComments is passed as a prop
 };
 
 export default CommentSection;

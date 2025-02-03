@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import PropTypes from "prop-types"; 
 import { selectUser } from "../redux/features/auth/userSlice";
 import React from "react";
 
@@ -71,6 +72,11 @@ const Layout = ({ children }) => {
       <main className="flex-grow">{children}</main>
     </div>
   );
+};
+
+// ✅ Add PropTypes validation
+Layout.propTypes = {
+  children: PropTypes.node.isRequired, // Ensures `children` is passed and can be any React node
 };
 
 const StyledLoginButton = styled(Link)`
