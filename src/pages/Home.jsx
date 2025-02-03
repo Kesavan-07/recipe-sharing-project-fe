@@ -32,8 +32,17 @@ const Home = () => {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font ">
+    <div
+      className="container mx-auto p-6"
+      style={{
+        backgroundImage: `url('/public/Images/home1jpg.jpg')`, // Update the path to your image
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        minWidth: "100vw",
+      }}
+    >
+      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font text-gray-600 ">
         Recipes you'll love
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -41,7 +50,7 @@ const Home = () => {
           <Link
             to={`/recipe/${recipe._id}`}
             key={recipe._id} // Ensure _id is unique
-            className="block bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition duration-300"
+            className="block bg-gray border border-gray-200 rounded-lg shadow transition duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-gray-100"
           >
             <img
               src={recipe.image || "https://via.placeholder.com/150"}
@@ -52,7 +61,7 @@ const Home = () => {
               <h2 className="text-lg font-bold text-gray-800">
                 {recipe.title}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-black">
                 Cooking Time: {recipe.cookingTime} mins
               </p>
             </div>
