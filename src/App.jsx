@@ -1,20 +1,26 @@
 import React, { useEffect } from "react";
-import { Outlet, useLoaderData } from "react-router";
+import { Outlet } from "react-router";
 import Layout from "./layouts/Layout";
 import { useDispatch } from "react-redux";
-import { clearUser, setUser } from "./redux/features/auth/userSlice";
+import { setUser } from "./redux/features/auth/userSlice";
+import authServices from "./services/authServices";
 
 const App = () => {
-  const user = useLoaderData(); 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (user) {
-      dispatch(setUser(user)); 
-    } else {
-      dispatch(clearUser()); 
-    }
-  }, [user]);
+    const restoreUser = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const user = await authServices.getCurrentUser();
+        if (user) {
+          dispatch(setUser(user));
+        }
+      }
+    };
+
+    restoreUser();
+  }, [dispatch]);
 
   return (
     <Layout>
