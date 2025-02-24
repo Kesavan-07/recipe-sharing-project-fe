@@ -1,323 +1,131 @@
+import axios from "axios";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectEmail,
-  selectPassword,
-  setEmail,
-  setPassword,
-  setUser,
-} from "../redux/features/auth/userSlice";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router";
-import authServices from "../services/authServices";
-import Loader from "../components/Loader";
-import styled from "styled-components";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { addUser } from "../redux/app/userSlice";
+import { BACKEND_BASEURL } from "../../utils";
 
-const Form = () => {
-  const email = useSelector(selectEmail);
-  const password = useSelector(selectPassword);
+const Auth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const [emailId, setEmail] = useState("jojo@gmail.com");
+  const [password, setPassword] = useState("Ghost123#");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const changeHandle = () => {
+    setIsSignup(!isSignup);
+    setEmail("");
+    setPassword("");
+    setName("");
+  };
+
+  const formHandler = async () => {
     setLoading(true);
     setError("");
 
-    if (!email || !password) {
-      toast.error("Please enter email and password");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const data = await authServices.login({ email, password });
+      const endpoint = isSignup ? "/signup" : "/login";
+      const payload = isSignup
+        ? { username: name, email: emailId, password }
+        : { email: emailId, password };
 
-      if (data.token) {
-        // Store token and user ID in localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.user._id); // ✅ Store userId for actions like "like"
+      const response = await axios.post(BACKEND_BASEURL + endpoint, payload, {
+        withCredentials: true,
+      });
 
-        // Dispatch user details to Redux
-        dispatch(setUser(data.user));
-        toast.success("Login successful");
-
-        // Navigate to the dashboard after login
-        setTimeout(() => {
-          navigate("/user/dashboard");
-        }, 500);
+      if (response.data?.user) {
+        dispatch(addUser(response.data.user));
+        if (!isSignup) {
+          navigate("/");
+        }
       } else {
-        throw new Error("Invalid credentials");
+        setError("Invalid email or password.");
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError(error.message);
-      toast.error(error.message || "Something went wrong");
+
+      // Clear form fields after signup
+      if (isSignup) {
+        setEmail("");
+        setPassword("");
+        setName("");
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || "Invalid email or password.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    toast.info("Signup functionality coming soon!");
-  };
-
-  const handleSwitch = () => {
-    setIsLogin(!isLogin);
-  };
-
   return (
-    <StyledWrapper>
-      <div className="background"> </div>
-      <div className="wrapper">
-        <div className="card-switch">
-          <label className="switch">
-            <input
-              type="checkbox"
-              className="toggle"
-              onChange={handleSwitch}
-              checked={!isLogin}
-            />
-            <span className="slider" />
-            <span className="card-side" />
-            <div className="flip-card__inner">
-              <div className="flip-card__front">
-                <div className="title">Log in</div>
-                <form className="flip-card__form" onSubmit={handleLogin}>
-                  <input
-                    className="flip-card__input"
-                    name="email"
-                    placeholder="Email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => dispatch(setEmail(e.target.value))}
-                    required
-                  />
-                  <input
-                    className="flip-card__input"
-                    name="password"
-                    placeholder="Password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => dispatch(setPassword(e.target.value))}
-                    required
-                  />
-                  {error && <p style={{ color: "red" }}>{error}</p>}
-                  <button className="flip-card__btn" type="submit">
-                    {loading ? "Logging in..." : "Let’s go!"}
-                  </button>
-                </form>
-              </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 transition-transform transform hover:scale-105">
+        <h2 className="text-center text-2xl font-bold text-gray-700">
+          {isSignup ? "Create an Account" : "Welcome Back"}
+        </h2>
+        <p className="text-gray-500 text-sm text-center mb-6">
+          {isSignup
+            ? "Join us and explore amazing features!"
+            : "Login to continue your journey!"}
+        </p>
 
-              <div className="flip-card__back">
-                <div className="title">Sign up</div>
-                <form className="flip-card__form" onSubmit={handleSignup}>
-                  <input
-                    className="flip-card__input"
-                    placeholder="Name"
-                    type="text"
-                    required
-                  />
-                  <input
-                    className="flip-card__input"
-                    placeholder="Email"
-                    type="email"
-                    required
-                  />
-                  <input
-                    className="flip-card__input"
-                    placeholder="Password"
-                    type="password"
-                    required
-                  />
-                  <button className="flip-card__btn" type="submit">
-                    Confirm!
-                  </button>
-                </form>
-              </div>
-            </div>
-          </label>
+        {isSignup && (
+          <div className="mt-4">
+            <input
+              type="text"
+              placeholder="Full Name"
+              className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="mt-4">
+          <input
+            type="email"
+            placeholder="Email Address"
+            className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+            value={emailId}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="mt-4">
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <button
+          onClick={formHandler}
+          className="w-full mt-6 py-3 bg-blue-500 text-white font-semibold rounded-lg transition hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 flex justify-center"
+          disabled={loading}
+        >
+          {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
+        </button>
+
+        <div className="text-center mt-4">
+          <p className="text-gray-600 text-sm">
+            {isSignup ? "Already have an account?" : "Don't have an account?"}
+            <button
+              onClick={() => changeHandle()}
+              className="ml-1 text-blue-500 hover:underline"
+            >
+              {isSignup ? "Login" : "Sign Up"}
+            </button>
+          </p>
         </div>
       </div>
-      {loading && (
-        <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
-          <Loader />
-        </div>
-      )}
-    </StyledWrapper>
+    </div>
   );
 };
 
-const StyledWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
-
-  .wrapper {
-    --input-focus: #2d8cf0;
-    --font-color: #323232;
-    --font-color-sub: #666;
-    --bg-color: #fff;
-    --main-color: #323232;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100%; /* Make sure wrapper takes up the full height */
-  }
-
-  /* switch card */
-  .switch {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    width: 50px;
-    height: 20px;
-  }
-
-  .toggle {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .slider {
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px var(--main-color);
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--bg-color);
-    transition: 0.3s;
-  }
-
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    border: 2px solid var(--main-color);
-    border-radius: 5px;
-    left: -2px;
-    bottom: 2px;
-    background-color: var(--bg-color);
-    box-shadow: 0 3px 0 var(--main-color);
-    transition: 0.3s;
-  }
-
-  .toggle:checked + .slider {
-    background-color: var(--input-focus);
-  }
-
-  .toggle:checked + .slider:before {
-    transform: translateX(30px);
-  }
-
-  .flip-card__inner {
-    width: 300px;
-    height: 350px;
-    position: relative;
-    background-color: transparent;
-    perspective: 1000px;
-    text-align: center;
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-  }
-
-  .toggle:checked ~ .flip-card__inner {
-    transform: rotateY(180deg);
-  }
-
-  .flip-card__front,
-  .flip-card__back {
-    padding: 20px;
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    backface-visibility: hidden;
-    background: lightgrey;
-    gap: 20px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px var(--main-color);
-  }
-
-  .flip-card__back {
-    transform: rotateY(180deg);
-  }
-
-  .flip-card__form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .title {
-    margin: 20px 0;
-    font-size: 25px;
-    font-weight: 900;
-    text-align: center;
-    color: var(--main-color);
-  }
-
-  .flip-card__input {
-    width: 250px;
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--font-color);
-    padding: 5px 10px;
-    outline: none;
-  }
-
-  .flip-card__input::placeholder {
-    color: var(--font-color-sub);
-    opacity: 0.8;
-  }
-
-  .flip-card__input:focus {
-    border: 2px solid var(--input-focus);
-  }
-
-  .flip-card__btn {
-    margin: 20px 0;
-    width: 120px;
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--font-color);
-    cursor: pointer;
-  }
-  .background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: url("/Images/login.jpg") no-repeat center center/cover;
-  }
-`;
-
-export default Form;
+export default Auth;

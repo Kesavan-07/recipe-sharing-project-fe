@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import recipeServices from "../../services/recipeServices";
+import { ThreeDots } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
-import SuccessNotification from "../../components/SuccessNotification";
+import axios from "axios";
+import { BACKEND_BASEURL } from "../../../utils";
 
 const RecipeDashboard = () => {
   const [recipeData, setRecipeData] = useState({
@@ -10,9 +11,11 @@ const RecipeDashboard = () => {
     instructions: "",
     cookingTime: "",
     servings: "",
-    image: null, // Updated to support file uploads
-    video: null, // Optional: Added for video uploads
+    image: null,
+    videoFileUrl: null,
+    videoURL: "",
   });
+
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,10 +23,42 @@ const RecipeDashboard = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-  setRecipeData({
-    ...recipeData,
-    [name]: name === "image" ? files[0] : value, // Handle file uploads
-    });
+
+    setRecipeData((prevData) => ({
+      ...prevData,
+      [name]: files && files.length > 0 ? files[0] : value,
+    }));
+  };
+
+  const uploadFile = async (type) => {
+    if (
+      (type === "image" && !recipeData.image) ||
+      (type === "video" && !recipeData.videoFileUrl)
+    ) {
+      return null;
+    }
+
+    const data = new FormData();
+    data.append(
+      "file",
+      type === "image" ? recipeData.image : recipeData.videoFileUrl
+    );
+    data.append(
+      "upload_preset",
+      type === "image" ? "images_preset" : "videos_preset"
+    );
+    console.log(data);
+    try {
+      let resourceType = type === "image" ? "image" : "video";
+      let api = `https://api.cloudinary.com/v1_1/dh0ryi7gp/${resourceType}/upload`;
+
+      const res = await axios.post(api, data);
+      console.log(`Uploaded ${type}:`, res.data.secure_url);
+      return res.data.secure_url;
+    } catch (error) {
+      console.error(`Failed to upload ${type}:`, error);
+      return null;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -31,20 +66,40 @@ const RecipeDashboard = () => {
     setLoading(true);
     setError(null);
 
-    // Create FormData for file uploads
-    const formData = new FormData();
-    formData.append("title", recipeData.title);
-    formData.append("ingredients", recipeData.ingredients);
-    formData.append("instructions", recipeData.instructions);
-    formData.append("cookingTime", recipeData.cookingTime);
-    formData.append("servings", recipeData.servings);
-    if (recipeData.image) formData.append("image", recipeData.image);
-    if (recipeData.video) formData.append("video", recipeData.video);
-
     try {
-      await recipeServices.createRecipe(formData);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 5000);
+      // Upload image
+      const imgUrl = recipeData.image ? await uploadFile("image") : null;
+      if (recipeData.image && !imgUrl) {
+        setError("Image upload failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Upload video file if provided
+      const videoFileUrl = recipeData.videoFileUrl
+        ? await uploadFile("video")
+        : null;
+
+      // Use video URL if provided, otherwise use uploaded file URL
+      const videoUrl = recipeData.videoURL ? recipeData.videoURL : null;
+      console.log(recipeData);
+      const finalData = {
+        title: recipeData.title,
+        ingredients: recipeData.ingredients,
+        instructions: recipeData.instructions,
+        cookingTime: recipeData.cookingTime,
+        servings: recipeData.servings,
+        imgUrl,
+        videoURL: videoUrl,
+        videoFileUrl,
+      };
+
+      console.log("Final Recipe Data:", finalData);
+
+      await axios.post(`${BACKEND_BASEURL}/createRecipe`, finalData, {
+        withCredentials: true,
+      });
+
       setRecipeData({
         title: "",
         ingredients: "",
@@ -52,34 +107,35 @@ const RecipeDashboard = () => {
         cookingTime: "",
         servings: "",
         image: null,
-        video: null,
+        videoFileUrl: null,
+        videoURL: "",
       });
-      navigate("/"); // Redirect to Home
-    } catch (err) {
-      setError("Failed to create recipe.");
-      console.error("❌ Error creating recipe:", err);
-    } finally {
+
+      console.log("Recipe Created Successfully!");
+      setSuccess(true);
+      setLoading(false);
+      navigate("/");
+    } catch (error) {
+      setError("An error occurred while creating the recipe.");
+      console.error("Submit Error:", error);
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 Playwrite-IN-font">
+    <div className="container mx-auto px-6 py-4 bg-white shadow-lg rounded-lg max-w-lg">
+      <h1 className="text-4xl font-bold text-center mb-6 text-gray-800">
         Create a Recipe
       </h1>
-
-      {/* ✅ Success Notification */}
-      {success && <SuccessNotification onClose={() => setSuccess(false)} />}
-
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
+      {success}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
           name="title"
           placeholder="Recipe Title"
           value={recipeData.title}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
         <textarea
@@ -87,7 +143,7 @@ const RecipeDashboard = () => {
           placeholder="Ingredients (comma separated)"
           value={recipeData.ingredients}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
         <textarea
@@ -95,42 +151,83 @@ const RecipeDashboard = () => {
           placeholder="Instructions"
           value={recipeData.instructions}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
-        <input
-          type="number"
-          name="cookingTime"
-          placeholder="Cooking Time (in minutes)"
-          value={recipeData.cookingTime}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="number"
-          name="servings"
-          placeholder="Servings"
-          value={recipeData.servings}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
+        <div className="flex gap-6">
+          <input
+            type="number"
+            name="cookingTime"
+            placeholder="Cooking Time (in minutes)"
+            value={recipeData.cookingTime}
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+          <input
+            type="number"
+            name="servings"
+            placeholder="Servings"
+            value={recipeData.servings}
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
+          />
+        </div>
+
+        <label className="block font-medium text-gray-700">Upload Image</label>
         <input
           type="file"
           name="image"
+          accept="image/*"
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border rounded-lg bg-gray-100"
         />
-        {error && <p className="text-red-500">{error}</p>}
-        <button
-          type="submit"
-          className="w-full p-2 bg-black text-white rounded"
-          disabled={loading}
-        >
-          {loading ? "Creating..." : "Create Recipe"}
-        </button>
+
+        <label className="block font-medium text-gray-700">
+          Upload Video (Optional)
+        </label>
+        <input
+          type="file"
+          name="videoFileUrl"
+          accept="video/*"
+          onChange={handleChange}
+          className={`w-full p-3 border rounded-lg bg-gray-100 ${
+            recipeData.videoURL ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={!!recipeData.videoURL}
+        />
+
+        <label className="block font-medium text-gray-700">
+          Or Enter YouTube Video URL
+        </label>
+        <input
+          type="text"
+          name="videoURL"
+          placeholder="YouTube Video URL"
+          value={recipeData.videoURL}
+          onChange={handleChange}
+          className={`w-full p-3 border rounded-lg bg-gray-100 ${
+            recipeData.videoFileUrl ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={!!recipeData.videoFileUrl}
+        />
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {!loading && (
+          <button
+            type="submit"
+            className="w-full p-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300"
+            disabled={loading}
+          >
+            {loading ? "Creating..." : "Create Recipe"}
+          </button>
+        )}
       </form>
+
+      {loading && (
+        <ThreeDots height="80" width="80" radius="9" color="#4fa94d" visible />
+      )}
     </div>
   );
 };

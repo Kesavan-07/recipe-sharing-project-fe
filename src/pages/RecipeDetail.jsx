@@ -1,229 +1,97 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import recipeServices from "../services/recipeServices";
+import { BACKEND_BASEURL } from "../../utils";
 
 const RecipeDetail = () => {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [liked, setLiked] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  const [showComments, setShowComments] = useState(false);
-  const [rating, setRating] = useState(0);
+  const getEmbedUrl = (url) => {
+    const youtubeRegex = /(?:youtu\.be\/|youtube\.com\/watch\?v=)([\w-]+)/;
+    const match = url.match(youtubeRegex);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+  };
 
   useEffect(() => {
-    const fetchRecipe = async () => {
+    const fetchRecipeDetails = async () => {
       try {
-        const response = await recipeServices.getRecipeById(id);
-        setRecipe(response);
-
-        const currentUserId = localStorage.getItem("userId");
-        setLiked(response.likes?.includes(currentUserId) || false); 
-        setRating(response.userRating || 0); 
-      } catch (err) {
-        console.error("Error fetching recipe:", err);
-        setError("Failed to load recipe details.");
+        const response = await axios.get(`${BACKEND_BASEURL}/recipes/${id}`, {
+          withCredentials: true,
+        });
+        setRecipe(response.data);
+      } catch (error) {
+        console.error("Error fetching recipe:", error);
+        setError("Failed to load recipe.");
       } finally {
         setLoading(false);
       }
     };
-    fetchRecipe();
+
+    fetchRecipeDetails();
   }, [id]);
 
-  // Handle sharing the recipe
-  const handleShare = async () => {
-    const recipeUrl = `${window.location.origin}/recipe/${id}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: recipe.title,
-          text: `Check out this recipe: ${recipe.title}!`,
-          url: recipeUrl,
-        });
-        console.log("Recipe shared successfully!");
-      } catch (err) {
-        console.error("Error sharing recipe:", err);
-      }
-    } else {
-      navigator.clipboard.writeText(recipeUrl).then(() => {
-        alert("Recipe link copied to clipboard!");
-      });
-    }
-  };
-
-  // Handle liking the recipe
-  const handleLike = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("Please log in to like the recipe.");
-        return;
-      }
-
-      const updatedRecipe = await recipeServices.likeRecipe(id, userId);
-
-      if (updatedRecipe) {
-        setLiked(!liked);
-        setRecipe(updatedRecipe);
-      } else {
-        alert("Failed to update like status.");
-      }
-    } catch (error) {
-      console.error("Error liking recipe:", error.message || error);
-    }
-  };
-
-  // Handle rating the recipe
-  const handleRating = async (newRating) => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("Please log in to rate the recipe.");
-        return;
-      }
-
-      const updatedRecipe = await recipeServices.rateRecipe(
-        id,
-        userId,
-        newRating
-      );
-
-      if (updatedRecipe) {
-        setRating(newRating);
-        setRecipe(updatedRecipe);
-      } else {
-        alert("Failed to update rating.");
-      }
-    } catch (error) {
-      console.error("Error rating recipe:", error.message || error);
-    }
-  };
-
-  // Handle posting a comment
-  const handleComment = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("Please log in to comment on the recipe.");
-        return;
-      }
-
-      const updatedRecipe = await recipeServices.addComment(id, {
-        userId,
-        text: newComment,
-      });
-
-      if (updatedRecipe) {
-        setRecipe(updatedRecipe);
-        setNewComment(""); // Clear the input after posting
-      } else {
-        alert("Failed to post comment.");
-      }
-    } catch (error) {
-      console.error("Error posting comment:", error.message || error);
-    }
-  };
-
-  if (loading) return <p >Loading...</p>;
-  if (error) return <p>{error}</p>;
-  if (!recipe) return null;
+  if (loading) return <p>Loading recipe...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">{recipe.title}</h1>
+    <div className="max-w-3xl mx-auto p-4">
+      {/* Title */}
+      <h1 className="text-4xl font-bold mb-4 text-center">{recipe.title}</h1>
+      {/* Image */}
       <img
-        src={recipe.image || "/public/Images/cake.jpg"}
+        src={recipe.image || "https://via.placeholder.com/300"}
         alt={recipe.title}
-        className="w-full h-64 object-cover rounded-lg mb-4"
+        className="w-full h-96 content-center object-cover rounded-lg mb-4"
       />
-
-      {/* Like, Comment, and Share Buttons */}
-      <div className="flex justify-around items-center py-4 border-t border-gray-200">
-        {/* Like Button */}
-        <button className="flex items-center gap-2" onClick={handleLike}>
-          <img
-            src="/Images/like.png" // Ensure this PNG file exists in your public directory
-            alt="Like"
-            className="w-6 h-6"
-          />
-          <span>{liked ? "Unlike" : "Like"}</span>
-        </button>
-
-        {/* Comment Button */}
-        <button
-          className="flex items-center gap-2"
-          onClick={() => setShowComments(!showComments)}
-        >
-          <img
-            src="/Images/comment.png" 
-            alt="Comment"
-            className="w-6 h-6"
-          />
-          <span>Comment</span>
-        </button>
-
-        {/* Share Button */}
-        <button className="flex items-center gap-2" onClick={handleShare}>
-          <img
-            src="/public/share.png" 
-            alt="Share"
-            className="w-6 h-6"
-          />
-          <span>Share</span>
-        </button>
+      {/* Cooking Time & Servings */}
+      <p className="text-lg">
+        <strong>Cooking Time:</strong> {recipe.cookingTime} minutes
+      </p>
+      <p className="text-lg">
+        <strong>Servings:</strong> {recipe.servings}
+      </p>
+      {/* Ingredients */}
+      <div className="mt-4">
+        <h2 className="text-2xl font-semibold">Ingredients</h2>
+        <ul className="list-disc pl-5">
+          {recipe.ingredients.map((ingredient, index) => (
+            <li key={index} className="text-lg">
+              {ingredient}
+            </li>
+          ))}
+        </ul>
       </div>
-
-      {/* Comments Section */}
-      {showComments && (
-        <div className="max-w-md mx-auto py-4">
-          <input
-            type="text"
-            placeholder="Add a comment..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="border p-2 w-full rounded"
-          />
-          <button
-            onClick={handleComment}
-            className="bg-gray-800 text-white px-4 py-2 rounded mt-2"
-          >
-            Post
-          </button>
+      {/* Video (if available) */}
+      {recipe.videoFileUrl && (
+        <div className="flex justify-center my-6">
+          <div className="w-full max-w-xl aspect-video">
+            <video controls className="w-full h-full rounded-lg">
+              <source src={recipe.videoFileUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       )}
 
-      <div className="max-w-md mx-auto">
-        <h2 className="text-xl font-bold mb-2">Ingredients:</h2>
-        <ul className="list-disc list-inside mb-4">
-          {recipe.ingredients?.map((ingredient, index) => (
-            <li key={index}>{ingredient}</li>
-          ))}
-        </ul>
-
-        <h2 className="text-xl font-bold mb-2">Instructions:</h2>
-        <p>{recipe.instructions}</p>
-      </div>
-
-      {/* Ratings Section */}
-      <div className="max-w-md mx-auto mt-6">
-        <h2 className="text-xl font-bold mb-2">Rate this Recipe:</h2>
-        <div className="flex space-x-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <span
-              key={star}
-              className={`cursor-pointer text-2xl ${
-                rating >= star ? "text-yellow-500" : "text-gray-400"
-              }`}
-              onClick={() => handleRating(star)}
-            >
-              ★
-            </span>
-          ))}
+      {recipe.videoURL && (
+        <div className="flex justify-center my-6">
+          <iframe
+            width="560"
+            height="315"
+            src={getEmbedUrl(recipe.videoURL)}
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          ></iframe>
         </div>
-        <p className="mt-2">
-          Average Rating: {recipe.averageRating || "No ratings yet"}
-        </p>
+      )}
+
+      {/* Instructions */}
+      <div className="mt-4">
+        <h2 className="text-2xl font-semibold">Instructions</h2>
+        <p className="text-lg leading-relaxed">{recipe.instructions}</p>
       </div>
     </div>
   );
