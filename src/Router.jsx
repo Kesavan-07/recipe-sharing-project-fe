@@ -7,6 +7,10 @@ import RecipeDashboard from "./pages/user/RecipeDashboard";
 import RecipeDetail from "./pages/RecipeDetail";
 import Profile from "./pages/user/Profile";
 import MyRecipes from "./pages/user/MyRecipes"; // MyRecipes for user's recipes
+// import CreateRecipe from "./pages/CreateRecipe"; // CreateRecipe import
+import SearchPage from "./pages/SearchPage"; // ✅ Import SearchPage
+// import recipesLoader from "./loaders/unit/recipesLoader";
+// import authLoader from "./loaders/unit/authLoader";
 import Loader from "./components/Loader";
 
 const routes = [
@@ -43,6 +47,15 @@ const routes = [
       {
         path: "recipes/:id", // Dynamic route for Recipe Details
         element: <RecipeDetail />, // Render RecipeDetail page
+      },
+      // {
+      //   path: "create-recipe", // Route for Create Recipe
+      //   element: <CreateRecipe />,
+      //   loader: authLoader, // Ensuring only authenticated users can access
+      // },
+      {
+        path: "search", // ✅ ADD THE SEARCH PAGE ROUTE
+        element: <SearchPage />,
       },
     ],
     hydrateFallbackElement: <Loader />,

@@ -1,15 +1,15 @@
 import instance from "./instance";
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:2222"; 
+const API_BASE_URL = "http://localhost:2222"; // ✅ Ensure this is defined
 
 const setAuthToken = (token) => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    localStorage.setItem("token", token); 
+    localStorage.setItem("token", token); // Store token
   } else {
     delete axios.defaults.headers.common["Authorization"];
-    localStorage.removeItem("token"); 
+    localStorage.removeItem("token"); // Clear token on logout
   }
 };
 
