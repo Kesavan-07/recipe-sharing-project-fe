@@ -1,40 +1,34 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { BACKEND_BASEURL } from "../../utils";
+import React, { useState } from "react";
 import Card from "../components/Card";
+import { useSelector } from "react-redux";
 
 const Home = () => {
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [openComments, setOpenComments] = useState(null);
 
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_BASEURL}/recipes`, {
-          withCredentials: true,
-        });
+  // Fetch recipes and filter query from Redux
+  const allRecipes = useSelector((store) => store.recipe.allrecipe[0]) || [];
+  const searchQuery = useSelector((store) => store.recipe.filter) || "";
+  const loading = useSelector((store) => store.recipe.loading);
+  const error = useSelector((store) => store.recipe.error);
 
-        if (Array.isArray(response.data)) {
-          setRecipes(response.data);
-        } else {
-          throw new Error("Unexpected API response format");
-        }
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-        setError("Failed to fetch recipes. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  console.log(allRecipes);
 
-    fetchRecipes();
-  }, []);
   const setfunction = (res) => {
     console.log(res);
     setOpenComments(res);
   };
+
+  // 🔍 **Filter recipes based on the search query (Name + Ingredients)**
+  const filteredRecipes = searchQuery
+    ? allRecipes.filter(
+        (recipe) =>
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) || // Match by name
+          recipe.ingredients?.some(
+            (ingredient) =>
+              ingredient.toLowerCase().includes(searchQuery.toLowerCase()) // Match by ingredients
+          )
+      )
+    : allRecipes;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
@@ -42,8 +36,8 @@ const Home = () => {
         <p className="text-center text-gray-500">Loading recipes...</p>
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
-      ) : recipes.length > 0 ? (
-        recipes.map((recipe) => (
+      ) : filteredRecipes.length > 0 ? (
+        filteredRecipes.map((recipe) => (
           <Card
             key={recipe._id}
             recipe={recipe}

@@ -1,20 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { IoIosHeartEmpty, IoIosHeart } from "react-icons/io";
-import { FaComment } from "react-icons/fa";
+import { FaComment, FaShareAlt } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BACKEND_BASEURL } from "../../utils";
 import Modal from "react-modal";
 import StarRating from "./Rating";
+import { useSelector } from "react-redux";
 
 Modal.setAppElement("#root");
 
-const Card = ({ recipe, actionBtn, setfunction, openComments, MyRecipe ,deleteRecipe }) => {
+const Card = ({
+  recipe,
+  actionBtn,
+  setfunction,
+  openComments,
+  MyRecipe,
+  deleteRecipe,
+}) => {
   const navigate = useNavigate();
-
+  const user = useSelector((store) => store.user);
+  const isLogin = Boolean(user?._id);
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(recipe.likes?.length || 0);
-  const commentsCount = recipe.comments?.length || 0;
+  const [commentsCount, setCommentsCount] = useState(
+    recipe.comments?.length || 0
+  );
   const [comment, setComment] = useState("");
   const [receivecomment, setReceivecomment] = useState([]); // ✅ FIXED
 
@@ -30,10 +41,14 @@ const Card = ({ recipe, actionBtn, setfunction, openComments, MyRecipe ,deleteRe
         console.error("Error checking like status:", error);
       }
     };
-    checkLikeStatus();
+    if (isLogin) {
+      checkLikeStatus();
+    }
   }, [recipe._id]);
 
-  
+  const followHandler = () => {
+    console.log("follow");
+  };
 
   const likeHandler = async () => {
     try {
@@ -61,6 +76,7 @@ const Card = ({ recipe, actionBtn, setfunction, openComments, MyRecipe ,deleteRe
         { withCredentials: true }
       );
       setReceivecomment(recommands.data.comments);
+      setCommentsCount(recommands.data.comments.length);
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
@@ -87,10 +103,28 @@ const Card = ({ recipe, actionBtn, setfunction, openComments, MyRecipe ,deleteRe
     }
   };
 
+  const shareRecipe = () => {
+    const recipeUrl = `${window.location.origin}/recipes/${recipe._id}`;
+    if (navigator.share) {
+      navigator
+        .share({
+          title: recipe.title,
+          text: "Check out this amazing recipe!",
+          url: recipeUrl,
+        })
+        .then(() => console.log("Recipe shared successfully"))
+        .catch((error) => console.error("Error sharing recipe:", error));
+    } else {
+      navigator.clipboard.writeText(recipeUrl);
+      alert("Recipe link copied to clipboard!");
+    }
+  };
+
   return (
     <>
-      <div className="card card-compact bg-base-100 shadow-xl rounded-md">
-        <div className="rounded-t-md overflow-hidden">
+      <div className="card card-compact bg-white shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105">
+        {/* Image Section */}
+        <div className="relative">
           <img
             className="w-full h-72 object-cover"
             src={recipe.image || "https://via.placeholder.com/150"}
@@ -99,51 +133,80 @@ const Card = ({ recipe, actionBtn, setfunction, openComments, MyRecipe ,deleteRe
           />
         </div>
 
-        <div className="card-body p-3">
-          <div className="card-actions flex justify-between items-center">
-            <p className="font-semibold text-lg">
+        {/* Content Section */}
+        <div className="p-4">
+          {/* Title */}
+          <div className="flex justify-between">
+            <h2 className="font-semibold text-xl text-gray-800 truncate">
               {recipe.title || "Untitled Recipe"}
-            </p>
-            {actionBtn && (
-              <div className="flex gap-3 cursor-pointer">
+            </h2>
+            {/* {isLogin && actionBtn && (
+              <button
+                className="inline-flex items-center px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-md"
+                onClick={isLogin ? followHandler : null}
+              >
+                follow
+              </button>
+            )} */}
+          </div>
+
+          {/* Actions: Like & Comment */}
+          {actionBtn && (
+            <div className="flex justify-between items-center mt-3">
+              <div className="flex gap-4">
+                {/* Like Button */}
+
                 <div
-                  className="flex items-center"
-                  onClick={likeHandler}
+                  className="flex items-center cursor-pointer hover:scale-110 transition"
+                  onClick={isLogin ? likeHandler : null}
                   aria-label="Like Recipe"
                 >
                   {liked ? (
                     <IoIosHeart className="w-6 h-6 text-red-500" />
                   ) : (
-                    <IoIosHeartEmpty className="w-6 h-6" />
+                    <IoIosHeartEmpty className="w-6 h-6 text-gray-500 hover:text-red-500" />
                   )}
-                  <p className="ml-1">{likes}</p>
+                  <span className="ml-1 text-gray-700">{likes}</span>
                 </div>
 
-                <div className="flex items-center" onClick={toggleComments}>
-                  <FaComment className="w-6 h-6 cursor-pointer" />
-                  <p className="ml-1">{commentsCount}</p>
+                {/* Comment Button */}
+                <div
+                  className="flex items-center cursor-pointer hover:scale-110 transition"
+                  onClick={toggleComments}
+                >
+                  <FaComment className="w-6 h-6 text-gray-500 hover:text-blue-500" />
+                  <span className="ml-1 text-gray-700">{commentsCount}</span>
+                </div>
+                <div
+                  className="flex items-center cursor-pointer hover:scale-110 transition"
+                  onClick={shareRecipe}
+                >
+                  <FaShareAlt className="w-6 h-6 text-gray-500 hover:text-green-500" />
                 </div>
               </div>
-            )}
-            <div className="">
-              {" "}
-              <button
-                className="inline-flex items-center px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-md"
-                onClick={() => navigate(`/recipes/${recipe._id}`)}
-              >
-                View Recipe
-              </button>
-              {MyRecipe && (
-                <button
-                  className="inline-flex items-center ms-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-md"
-                  onClick={() => deleteRecipe(recipe._id)}
-                >
-                  Delete
-                </button>
-              )}
-            </div>
 
-            {actionBtn && <StarRating recipeId={recipe._id}></StarRating>}
+              {/* Star Rating */}
+              <div>{actionBtn && <StarRating recipeId={recipe._id} />}</div>
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div className="flex justify-between items-center mt-5">
+            <button
+              className="w-full px-5 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-all shadow-md"
+              onClick={() => navigate(`/recipes/${recipe._id}`)}
+            >
+              View Recipe
+            </button>
+
+            {MyRecipe && (
+              <button
+                className="ml-3 px-5 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-all shadow-md"
+                onClick={() => deleteRecipe(recipe._id)}
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -200,21 +263,23 @@ const Card = ({ recipe, actionBtn, setfunction, openComments, MyRecipe ,deleteRe
           </div>
 
           {/* Comment Input Box */}
-          <div className="mt-4 flex items-center border rounded-lg overflow-hidden shadow-sm">
-            <input
-              type="text"
-              className="flex-1 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Write a comment..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <button
-              className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-r-lg transition-all"
-              onClick={submitComment}
-            >
-              Send
-            </button>
-          </div>
+          {isLogin && (
+            <div className="mt-4 flex items-center border rounded-lg overflow-hidden shadow-sm">
+              <input
+                type="text"
+                className="flex-1 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Write a comment..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <button
+                className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-r-lg transition-all"
+                onClick={submitComment}
+              >
+                Send
+              </button>
+            </div>
+          )}
 
           {/* Close Button */}
           <button

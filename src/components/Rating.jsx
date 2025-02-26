@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import axios from "axios";
 import { BACKEND_BASEURL } from "../../utils";
+import { useSelector } from "react-redux";
 
 const StarRating = ({ recipeId }) => {
-  const [userRating, setUserRating] = useState(null); // Start as null
+  const [userRating, setUserRating] = useState(null);
   const [hover, setHover] = useState(null);
   const [loading, setLoading] = useState(false);
+  const user = useSelector((store) => store.user);
+  const isLogin = Boolean(user?._id);
 
   useEffect(() => {
     const fetchUserRating = async () => {
@@ -16,46 +19,33 @@ const StarRating = ({ recipeId }) => {
           { withCredentials: true }
         );
 
-        console.log(response.data.ratings);
+        const { ratings, userId } = response.data; // Extract data
 
-        // Extract user ID from session or auth (Make sure backend sends user ID)
-        const userId = response.data.userId; // Ensure the backend provides this!
+        if (!userId) return console.warn("User ID not provided by backend");
 
-        // Find the logged-in user's rating
-        // const userRatingObj = response.data.ratings.find(
-        //   (rating) => rating.user._id.toString() === userId
-        // );
-        response.data.ratings.forEach((ele) => {
-          if (ele.user._id === userId) {
-            setUserRating(ele.rating); // Set existing rating
-            console.log(ele.user._id + "   true");
-          } else {
-            console.log(ele.user._id + " false");
-          }
-        });
+        const userRatingObj = ratings.find(
+          (rating) => rating.user._id === userId
+        );
 
-        // if (userRatingObj) {
-        //   console.log(userRatingObj.user._id + " true");
-        // } else {
-        //   console.log("User rating not found");
-        // }
-
-        // console.log(userRatingObj + "  jdkfjjfkljdlkjlk");
-        // if (userRatingObj) {
-        //   setUserRating(userRatingObj.rating); // Set existing rating
-        // } else {
-        //   setUserRating(0); // Allow new rating
-        // }
+        if (userRatingObj) {
+          setUserRating(userRatingObj.rating);
+        } else {
+          setUserRating(0); // Allow new rating
+        }
       } catch (error) {
         console.error("Error fetching user rating:", error);
       }
     };
 
-    fetchUserRating();
-  }, [recipeId]);
+    if (isLogin) {
+      fetchUserRating();
+    } else {
+      setUserRating(Math.floor(Math.random() * 5) + 1); // Assign random rating for non-logged-in users
+    }
+  }, [recipeId, isLogin]);
 
   const handleRating = async (newRating) => {
-    if (loading || userRating > 0) return; // Prevent re-rating if already rated
+    if (loading || userRating > 0) return; // Prevent re-rating
     setLoading(true);
 
     try {
@@ -65,7 +55,7 @@ const StarRating = ({ recipeId }) => {
         { withCredentials: true }
       );
 
-      setUserRating(newRating); // Set new rating
+      setUserRating(newRating);
     } catch (error) {
       console.error("Error submitting rating:", error);
     } finally {
@@ -81,7 +71,7 @@ const StarRating = ({ recipeId }) => {
           className={`cursor-pointer transition-all ${
             (hover || userRating) >= star ? "text-yellow-400" : "text-gray-300"
           }`}
-          onClick={() => handleRating(star)}
+          onClick={() => (isLogin ? handleRating(star) : null)}
           onMouseEnter={() => userRating === 0 && setHover(star)}
           onMouseLeave={() => setHover(null)}
           style={{
