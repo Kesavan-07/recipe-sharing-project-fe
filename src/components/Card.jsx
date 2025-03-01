@@ -31,10 +31,13 @@ const Card = ({
 
   useEffect(() => {
     const checkLikeStatus = async () => {
+      console.log(user.token);
       try {
         const response = await axios.get(
           `${BACKEND_BASEURL}/likes/${recipe._id}`,
-          { withCredentials: true }
+          {
+            withCredentials: true
+          }
         );
         setLiked(response.data.userLiked);
       } catch (error) {
@@ -55,7 +58,9 @@ const Card = ({
       await axios.patch(
         `${BACKEND_BASEURL}/recipe/like/${recipe._id}`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true
+        }
       );
 
       setLiked((prevLiked) => {
@@ -73,7 +78,9 @@ const Card = ({
     try {
       const recommands = await axios.get(
         `${BACKEND_BASEURL}/comments/${recipe._id}`,
-        { withCredentials: true }
+        {
+          withCredentials: true
+        }
       );
       setReceivecomment(recommands.data.comments);
       setCommentsCount(recommands.data.comments.length);
@@ -88,14 +95,18 @@ const Card = ({
       await axios.patch(
         `${BACKEND_BASEURL}/recipe/command/${recipe._id}`, // ✅ FIXED ENDPOINT
         { text: comment },
-        { withCredentials: true }
+        {
+          withCredentials: true
+        }
       );
       setComment("");
 
       // Fetch updated comments
       const updatedComments = await axios.get(
         `${BACKEND_BASEURL}/comments/${recipe._id}`,
-        { withCredentials: true }
+        {
+          withCredentials: true
+        }
       );
       setReceivecomment(updatedComments.data.comments);
     } catch (error) {
