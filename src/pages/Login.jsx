@@ -24,41 +24,46 @@ const Auth = () => {
   };
 
   const formHandler = async () => {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      const endpoint = isSignup ? "/signup" : "/login";
-      const payload = isSignup
-        ? { username: name, email: emailId, password }
-        : { email: emailId, password };
+  try {
+    const endpoint = isSignup ? "/signup" : "/login";
+    const payload = isSignup
+      ? { username: name, email: emailId, password }
+      : { email: emailId, password };
 
-      const response = await axios.post(BACKEND_BASEURL + endpoint, payload, {
-        withCredentials: true,
-      });
+    const response = await axios.post(BACKEND_BASEURL + endpoint, payload, {
+      withCredentials: true, // Remove if using localStorage instead of cookies
+    });
 
-      if (response.data?.user) {
-        dispatch(addUser(response.data.user));
-        if (!isSignup) {
-          navigate("/");
-        }
-      } else {
-        setError("Invalid email or password.");
+    if (response.data?.user && response.data?.token) {
+      dispatch(addUser(response.data.user));
+
+      // ✅ Store token in localStorage
+      localStorage.setItem("token", response.data.token);
+
+      // ✅ Set token globally for all axios requests
+      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
+
+      if (!isSignup) {
+        navigate("/");
       }
-
-      // Clear form fields after signup
-      if (isSignup) {
-        setEmail("");
-        setPassword("");
-        setName("");
-      }
-    } catch (err) {
-      setError(err?.response?.data?.message || "Invalid email or password.");
-    } finally {
-      setLoading(false);
+    } else {
+      setError("Invalid email or password.");
     }
-  };
 
+    if (isSignup) {
+      setEmail("");
+      setPassword("");
+      setName("");
+    }
+  } catch (err) {
+    setError(err?.response?.data?.message || "Invalid email or password.");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 transition-transform transform hover:scale-105">
